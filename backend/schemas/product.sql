@@ -1,0 +1,1 @@
+-- table with title, company, description, price, inStock, createdTimestamp, updatedtimestamp(this may need a trigger)
