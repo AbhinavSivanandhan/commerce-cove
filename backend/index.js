@@ -1,46 +1,17 @@
 import express from "express";
 import cors from 'cors';
 import dotenv from 'dotenv';
-
+import db from './db/index.js';
 dotenv.config();
 //database setup
-import pkg from 'pg';
-const { Client } = pkg;
+import setupDatabase from './db/setupdb.js';
 
-const DB_NAME = process.env.DB_NAME;
-const DB_USER = process.env.DB_USER;
-const DB_HOST = process.env.DB_HOST;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_PORT = process.env.DB_PORT;
-const DEFAULT_DB = process.env.DEFAULT_DB;  // Default database to connect to
-
-async function setupDatabase() {
-
-    const client = new Client({
-        host: DB_HOST,
-        user: DB_USER,
-        password: DB_PASSWORD,
-        port: DB_PORT,
-        database: DEFAULT_DB,  // Use default database for initial connection
-    });
-    
-    await client.connect();
-    
-    const res = await client.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = '${DB_NAME}'`);
-    
-    if (res.rowCount === 0) {
-        console.log(`${DB_NAME} database not found, creating it.`);
-        // Switch connection to postgres database to create a new database
-        await client.query(`CREATE DATABASE "${DB_NAME}";`);
-        console.log(`created database ${DB_NAME}.`);
-    } else {
-        console.log(`${DB_NAME} database already exists.`);
-    }
-    
-    await client.end();
-}
-
-setupDatabase();
+setupDatabase().then(() => {
+    console.log('Database setup completed.');
+    // Add additional code here if needed after the database setup is complete
+}).catch(error => {
+    console.error('Error setting up the database:', error);
+});
 //db initial setup
 
 
@@ -56,16 +27,55 @@ app.get('/',(request, response) => {
 });
 
 //POST route to save a product
-app.post('/products', async(request, response)=>{
-  //try catch block where try block validates posted data from request.body
-  //create a variable using this request.body's infi
-  //save it
+app.post('/api/v1/products', async(request, response)=>{
+  try{
+    const results = await db.query("INSERT INTO product (description, price, instock, seller_id, companyname) VALUES($1,$2,$3,$4,$5)",['Gaming Keyboard 2', 269.99, true, 3, 'PressJ']);
+    console.log(results);
+    response.status(200).json({
+      status: "success",
+      results: results.rows.length,
+      data: {
+        products: results.rows,
+      },
+    });
+    } catch(err){
+      console.log(err);
+    }
 })
 
-//Route to get all books
-app.get('/books', async(request, response)=>{
-  //try catch block to await and find all books, else return error message
-})
+//Route to get all products
+app.get('/api/v1/products', async(request, response)=>{
+  try{
+  const results = await db.query("select * from product");
+  console.log(results);
+  response.status(200).json({
+    status: "success",
+    results: results.rows.length,
+    data: {
+      products: results.rows,
+    },
+  });
+  } catch(err){
+    console.log(err);
+  }
+});
+
+//Route to get one product
+app.get('/api/v1/products/:id', async(request, response)=>{
+  try{
+  const results = await db.query("select * from product where product_id=$1",[request.params.id]);
+  console.log(results);
+  response.status(200).json({
+    status: "success",
+    results: results.rows.length,
+    data: {
+      products: results.rows,
+    },
+  });
+  } catch(err){
+    console.log(err);
+  }
+});
 
 app.listen(process.env.PORT, () => {
     console.log(`App is listening to port:${process.env.PORT}`);

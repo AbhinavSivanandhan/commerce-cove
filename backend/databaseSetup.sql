@@ -8,3 +8,16 @@ CREATE TABLE product(
     seller_id INT NOT NULL,
     companyname VARCHAR(255) NOT NULL
 )
+
+CREATE TABLE user(
+    user_id SERIAL PRIMARY KEY, 
+    description VARCHAR(255) NOT NULL,
+    active boolean NOT NULL
+)
+
+CREATE TABLE seller(
+    seller_id SERIAL PRIMARY KEY,
+    companyname VARCHAR(255) NOT NULL,
+    user_id INT UNIQUE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id)
+);
