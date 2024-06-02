@@ -14,8 +14,6 @@ const Home = () => {
     axios
       .get('http://localhost:5000/api/v1/products')
       .then((response)=>{
-        console.log(response);
-        console.log(response.data.data.products);
         setProducts(response.data.data.products);
         setLoading(false);
       })

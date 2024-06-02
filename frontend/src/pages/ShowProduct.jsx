@@ -12,12 +12,9 @@ const ShowProduct = () => {
   useEffect( () => {
     setLoading(true);
     axios
-      .get(`https://localhost:5000/api/v1/products/${id}`)
+      .get(`http://localhost:5000/api/v1/products/${id}`)
       .then((response) => {
-        console.log(response.data.data.products[0]);
         setProduct(response.data.data.products[0]);
-        console.log('hey');
-        console.log(product);
         setLoading(false);
       })
       .catch((error)=>{
@@ -48,6 +45,14 @@ const ShowProduct = () => {
           <div className='my-4'>
             <span className='text-xl mr-4 text-gray-500'>instock</span>
             <span>{product.instock ? 'Yes' : 'No'}</span>
+          </div>
+          <div className='my-4'>
+            <span className='text-xl mr-4 text-gray-500'>S-Id</span>
+            <span>{product.seller_id}</span>
+          </div>
+          <div className='my-4'>
+            <span className='text-xl mr-4 text-gray-500'>Company Name</span>
+            <span>{product.companyname}</span>
           </div>
         </div>
         )

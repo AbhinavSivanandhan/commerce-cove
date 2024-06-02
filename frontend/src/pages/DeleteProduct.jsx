@@ -11,7 +11,7 @@ const DeleteProduct = () => {
   const handleDeleteProduct = () => {
     setLoading(true);
     axios
-    .delete(`https://localhost:5000/products/${id}`)
+    .delete(`http://localhost:5000/api/v1/products/${id}`)
     .then(()=>{
       setLoading(false);
       navigate('/');
