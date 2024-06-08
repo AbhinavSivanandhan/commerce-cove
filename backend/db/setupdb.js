@@ -46,7 +46,7 @@ async function setupDatabase() {
 
     // Define the schemas
     const schemaQueries = `
-    CREATE TABLE IF NOT EXISTS product(
+    CREATE TABLE IF NOT EXISTS "product"(
         product_id SERIAL PRIMARY KEY,
         description VARCHAR(255) NOT NULL,
         price DECIMAL(10, 2) NOT NULL,
@@ -55,17 +55,12 @@ async function setupDatabase() {
         companyname VARCHAR(255) NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS account(
-        account_id SERIAL PRIMARY KEY, 
-        description VARCHAR(255) NOT NULL,
-        active BOOLEAN NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS seller(
-        seller_id SERIAL PRIMARY KEY,
-        companyname VARCHAR(255) NOT NULL,
-        account_id INT UNIQUE NOT NULL,
-        FOREIGN KEY (account_id) REFERENCES account(account_id)
+    CREATE TABLE IF NOT EXISTS account (
+        user_id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'customer', 'seller')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     `;
 

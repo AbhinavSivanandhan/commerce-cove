@@ -10,8 +10,13 @@ const DeleteProduct = () => {
   const {id} = useParams();
   const handleDeleteProduct = () => {
     setLoading(true);
+    const token = localStorage.getItem('token');
     axios
-    .delete(`http://localhost:5000/api/v1/products/${id}`)
+    .delete(`http://localhost:5000/api/v1/products/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
     .then(()=>{
       setLoading(false);
       navigate('/');

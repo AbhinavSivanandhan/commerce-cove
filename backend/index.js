@@ -2,6 +2,8 @@ import express from "express";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './db/index.js';
+import accountRoutes from './accountRoutes.js';
+import authMiddleware from './authMiddleware.js';
 dotenv.config();
 //database setup
 import setupDatabase from './db/setupdb.js';
@@ -17,20 +19,19 @@ setupDatabase().then(() => {
 
 const app = express();
 
-//Middlware
+//Middleware
 app.use(cors());
 app.use(express.json()); //this will allow to read req.body
+app.use('/api/v1/accounts', accountRoutes);
 
 app.get('/',(request, response) => {
-    console.log(request);
     return response.send('Welcome to CommerceCove');
 });
 
 //POST route to save a product
-app.post('/api/v1/products', async(request, response)=>{
+app.post('/api/v1/products', authMiddleware(['admin']), async(request, response)=>{
   try{
     const results = await db.query("INSERT INTO product (description, price, instock, seller_id, companyname) VALUES($1,$2,$3,$4,$5) returning *",[request.body.description,request.body.price,request.body.instock,request.body.seller_id,request.body.companyname]);
-    console.log(results);
     response.status(200).json({
       status: "success",
       results: results.rows.length,
@@ -44,7 +45,7 @@ app.post('/api/v1/products', async(request, response)=>{
 })
 
 //Put route to update a product
-app.put('/api/v1/products', async (request, response) => {
+app.put('/api/v1/products', authMiddleware(['admin']), async (request, response) => {
   try {
     // Log the incoming request body
     console.log('Received request body:', request.body);
@@ -84,27 +85,10 @@ app.put('/api/v1/products', async (request, response) => {
   }
 });
 
-// app.put('/api/v1/products', async(request, response)=>{
-//   try{
-//     const results = await db.query("UPDATE product SET description = $1, price = $2, instock = $3, seller_id = $4, companyname = $5 WHERE product_id = $6 RETURNING *;",[request.body.desc,request.body.price,request.body.instock,request.body.seller_id,request.body.companyname,request.body.product_id]);//['Gaming Keyboard 2', 269.99, true, 3, 'PressJ']
-//     console.log(results);
-//     response.status(200).json({
-//       status: "success",
-//       results: results.rows.length,
-//       data: {
-//         products: results.rows,
-//       },
-//     });
-//     } catch(err){
-//       console.log(err);
-//     }
-// })
-
 //Route to get all products
 app.get('/api/v1/products', async(request, response)=>{
   try{
   const results = await db.query("select * from product");
-  console.log(results);
   response.status(200).json({
     status: "success",
     results: results.rows.length,
@@ -121,7 +105,6 @@ app.get('/api/v1/products', async(request, response)=>{
 app.get('/api/v1/products/:id', async(request, response)=>{
   try{
   const results = await db.query("select * from product where product_id=$1",[request.params.id]);
-  console.log(results);
   response.status(200).json({
     status: "success",
     results: results.rows.length,
@@ -135,10 +118,9 @@ app.get('/api/v1/products/:id', async(request, response)=>{
 });
 
 //Delete Product
-app.delete('/api/v1/products/:id', async(request, response)=>{
+app.delete('/api/v1/products/:id', authMiddleware(['admin']), async(request, response)=>{
   try{
   const results = await db.query("delete from product where product_id=$1 returning *",[request.params.id]);
-  console.log(results);
   response.status(200).json({
     status: "success",
     results: results.rows.length,

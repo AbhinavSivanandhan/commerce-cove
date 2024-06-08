@@ -22,9 +22,14 @@ const CreateProduct = () => {
       instock
     };
     setLoading(true);
+    const token = localStorage.getItem('token');
     console.log(data);
     axios
-      .post('http://localhost:5000/api/v1/products', data)
+      .post('http://localhost:5000/api/v1/products', data, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       .then(()=>{
         setLoading(false);
         navigate('/');

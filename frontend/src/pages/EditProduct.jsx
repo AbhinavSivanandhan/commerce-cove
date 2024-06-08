@@ -43,10 +43,15 @@ const EditProduct = () => {
       instock
     };
     setLoading(true);
+    const token = localStorage.getItem('token');
     console.log('data');
     console.log(data);
     axios
-      .put('http://localhost:5000/api/v1/products', data)
+      .put('http://localhost:5000/api/v1/products', data, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(()=>{
         setLoading(false);
         navigate('/');
