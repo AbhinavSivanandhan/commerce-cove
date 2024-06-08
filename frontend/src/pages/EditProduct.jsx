@@ -19,12 +19,13 @@ const EditProduct = () => {
     setLoading(true);
     axios.get(`http://localhost:5000/api/v1/products/${id}`)
     .then((response)=>{
-      setPid(response.data.data.products[0].product_id);
-      setDescription(response.data.data.products[0].description);
-      setPrice(response.data.data.products[0].price);
-      setInstock(response.data.data.products[0].instock);
-      setCompanyname(response.data.data.products[0].companyname);
-      setSid(response.data.data.products[0].seller_id);
+      console.log(response);
+      setPid(response.data.data.product.product_id);
+      setDescription(response.data.data.product.description);
+      setPrice(response.data.data.product.price);
+      setInstock(response.data.data.product.instock);
+      setCompanyname(response.data.data.product.companyname);
+      setSid(response.data.data.product.seller_id);
       setLoading(false);
     }).catch((error)=>{
       setLoading(false);

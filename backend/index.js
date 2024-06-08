@@ -1,140 +1,38 @@
-import express from "express";
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './db/index.js';
-import accountRoutes from './accountRoutes.js';
-import authMiddleware from './authMiddleware.js';
+import accountRoutes from './routes/accountRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import errorHandler from './middleware/errorMiddleware.js'; // Import error handler
 dotenv.config();
-//database setup
+
+// Database setup
 import setupDatabase from './db/setupdb.js';
 
 setupDatabase().then(() => {
-    console.log('Database setup completed.');
-    // Add additional code here if needed after the database setup is complete
+  console.log('Database setup completed.');
 }).catch(error => {
-    console.error('Error setting up the database:', error);
+  console.error('Error setting up the database:', error);
 });
-//db initial setup
-
 
 const app = express();
 
-//Middleware
+// Middleware
 app.use(cors());
-app.use(express.json()); //this will allow to read req.body
+app.use(express.json()); // this will allow to read req.body
+
+// Routes
 app.use('/api/v1/accounts', accountRoutes);
+app.use('/api/v1/products', productRoutes);
 
-app.get('/',(request, response) => {
-    return response.send('Welcome to CommerceCove');
+app.get('/', (request, response) => {
+  return response.send('Welcome to CommerceCove');
 });
 
-//POST route to save a product
-app.post('/api/v1/products', authMiddleware(['admin']), async(request, response)=>{
-  try{
-    const results = await db.query("INSERT INTO product (description, price, instock, seller_id, companyname) VALUES($1,$2,$3,$4,$5) returning *",[request.body.description,request.body.price,request.body.instock,request.body.seller_id,request.body.companyname]);
-    response.status(200).json({
-      status: "success",
-      results: results.rows.length,
-      data: {
-        products: results.rows,
-      },
-    });
-    } catch(err){
-      console.log(err);
-    }
-})
-
-//Put route to update a product
-app.put('/api/v1/products', authMiddleware(['admin']), async (request, response) => {
-  try {
-    // Log the incoming request body
-    console.log('Received request body:', request.body);
-
-    // Extracting values from the request body
-    const { description, price, instock, seller_id, companyname, product_id } = request.body;
-
-    // Log the values to ensure they are being correctly extracted
-    console.log('Updating product with values:', { description, price, instock, seller_id, companyname, product_id });
-
-    // Execute the database query to update the product
-    const results = await db.query(
-      "UPDATE product SET description = $1, price = $2, instock = $3, seller_id = $4, companyname = $5 WHERE product_id = $6 RETURNING *;",
-      [description, price, instock, seller_id, companyname, product_id]
-    );
-
-    // Log the results of the query
-    console.log('Update results:', results);
-
-    // Send the response back to the client
-    response.status(200).json({
-      status: "success",
-      results: results.rows.length,
-      data: {
-        products: results.rows,
-      },
-    });
-  } catch (err) {
-    // Log any errors that occur
-    console.error('Error updating product:', err);
-
-    // Send an error response back to the client
-    response.status(500).json({
-      status: "error",
-      message: err.message,
-    });
-  }
-});
-
-//Route to get all products
-app.get('/api/v1/products', async(request, response)=>{
-  try{
-  const results = await db.query("select * from product");
-  response.status(200).json({
-    status: "success",
-    results: results.rows.length,
-    data: {
-      products: results.rows,
-    },
-  });
-  } catch(err){
-    console.log(err);
-  }
-});
-
-//Route to get one product
-app.get('/api/v1/products/:id', async(request, response)=>{
-  try{
-  const results = await db.query("select * from product where product_id=$1",[request.params.id]);
-  response.status(200).json({
-    status: "success",
-    results: results.rows.length,
-    data: {
-      products: results.rows,
-    },
-  });
-  } catch(err){
-    console.log(err);
-  }
-});
-
-//Delete Product
-app.delete('/api/v1/products/:id', authMiddleware(['admin']), async(request, response)=>{
-  try{
-  const results = await db.query("delete from product where product_id=$1 returning *",[request.params.id]);
-  response.status(200).json({
-    status: "success",
-    results: results.rows.length,
-    data: {
-      products: results.rows,
-    },
-  });
-  } catch(err){
-    console.log(err);
-  }
-});
+// Error handling middleware
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () => {
-    console.log(`App is listening to port:${process.env.PORT}`);
+  console.log(`App is listening to port:${process.env.PORT}`);
 });
-
-//connect to db in a try catch block
