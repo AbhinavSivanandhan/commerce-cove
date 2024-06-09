@@ -62,6 +62,25 @@ async function setupDatabase() {
         role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'customer', 'seller')),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS cart (
+        cart_id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES account(user_id),
+        product_id INTEGER REFERENCES product(product_id),
+        quantity INTEGER NOT NULL,
+        status VARCHAR(20) DEFAULT 'active'
+    );
+
+    CREATE TABLE IF NOT EXISTS order_history (
+        order_id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES account(user_id),
+        product_id INTEGER REFERENCES product(product_id),
+        quantity INTEGER NOT NULL,
+        total_price DECIMAL(10, 2) NOT NULL,
+        address TEXT NOT NULL,
+        contact_details VARCHAR(255) NOT NULL,
+        status VARCHAR(20) DEFAULT 'paid'
+    );
     `;
 
     await dbClient.query(schemaQueries);

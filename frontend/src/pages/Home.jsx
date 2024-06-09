@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import {AiOutlineEdit} from 'react-icons/ai';
 import {BsInfoCircle} from 'react-icons/bs';
 import {MdOutlineAddBox, MdOutlineDelete} from 'react-icons/md';
+import Header from '../components/Header';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -22,6 +23,8 @@ const Home = () => {
       });
 }, []);
   return (
+    <>
+    <Header />
     <div className='p-4'>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl my-8">Products List</h1>
@@ -79,6 +82,7 @@ const Home = () => {
         </table>
       )}
     </div>
+    </>
   );
 };
 

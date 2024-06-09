@@ -14,7 +14,10 @@ const ShowProduct = () => {
     axios
       .get(`http://localhost:5000/api/v1/products/${id}`)
       .then((response) => {
-        setProduct(response.data.data.products[0]);
+        console.log(response);
+        console.log('product:');
+        console.log(response.data.data.product);
+        setProduct(response.data.data.product);
         setLoading(false);
       })
       .catch((error)=>{

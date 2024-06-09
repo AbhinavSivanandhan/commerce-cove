@@ -8,6 +8,8 @@ import DeleteProduct from './pages/DeleteProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProductList from './pages/ProductList';
+import Cart from './pages/Cart';
 
 const App = () => {
   return (
@@ -19,6 +21,8 @@ const App = () => {
       <Route path='/products/details/:id' element={<ProtectedRoute><ShowProduct /></ProtectedRoute>} />
       <Route path='/products/edit/:id' element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
       <Route path='/products/delete/:id' element={<ProtectedRoute><DeleteProduct /></ProtectedRoute>} />
+      <Route path='/products' element={<ProtectedRoute><ProductList /></ProtectedRoute>} />
+      <Route path='/cart' element={<ProtectedRoute><Cart /></ProtectedRoute>} />
     </Routes>
   )
 }

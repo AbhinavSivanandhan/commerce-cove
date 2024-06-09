@@ -4,7 +4,9 @@ import dotenv from 'dotenv';
 import db from './db/index.js';
 import accountRoutes from './routes/accountRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
 import errorHandler from './middleware/errorMiddleware.js'; // Import error handler
+
 dotenv.config();
 
 // Database setup
@@ -25,6 +27,7 @@ app.use(express.json()); // this will allow to read req.body
 // Routes
 app.use('/api/v1/accounts', accountRoutes);
 app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/carts', cartRoutes);
 
 app.get('/', (request, response) => {
   return response.send('Welcome to CommerceCove');
