@@ -64,7 +64,7 @@ async function setupDatabase() {
     );
 
     CREATE TABLE IF NOT EXISTS cart (
-        cart_id SERIAL PRIMARY KEY,
+        cart_type VARCHAR(20) NOT NULL CHECK (cart_type IN ('primary', 'wishlist', 'recommended')),
         user_id INTEGER REFERENCES account(user_id),
         product_id INTEGER REFERENCES product(product_id),
         quantity INTEGER NOT NULL,

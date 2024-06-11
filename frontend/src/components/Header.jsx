@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaShoppingCart } from "react-icons/fa";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -56,7 +57,12 @@ const Header = () => {
       <div className="flex items-center">
         {isLoggedIn ? (
           <>
-            <span className="mr-4 text-gray-700">Welcome, {username}</span>
+            <Link to='/cart'>
+              <button className='bg-stone-950 text-white px-4 py-2 rounded flex items-center'>
+                <FaShoppingCart className="mr-2" />
+              </button>
+            </Link>
+            <span className="ml-4 text-gray-700">{username}</span>
             <button onClick={handleLogout} className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
               Logout
             </button>
