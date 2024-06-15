@@ -46,9 +46,20 @@ export const getProductByIdController = async (req, res) => {
 
 export const getAllProductsController = async (req, res) => {
   try {
-    const products = await getAllProducts();
-    res.status(200).json({ status: "success", data: { products } });
-  } catch (error) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const { rows: products, rowCount } = await getAllProducts(limit, offset);
+    const totalPages = Math.ceil(rowCount / limit);    
+    res.status(200).json({ 
+      status: "success", 
+      data: { 
+        products, 
+        totalPages, 
+        currentPage: page 
+      } 
+    });
+    } catch (error) {
     console.error('Error getting products:', error);
     res.status(500).json({ status: "error", message: error.message });
   }

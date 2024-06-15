@@ -10,19 +10,28 @@ import Header from '../components/Header';
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchId, setSearchId] = useState('');
+  const limit = 10; // Number of products per page
+
   useEffect(() => {
+    fetchProducts();
+  }, [currentPage]);
+  const fetchProducts = () => {
     setLoading(true);
     axios
-      .get('http://localhost:5000/api/v1/products')
+      .get(`http://localhost:5000/api/v1/products?page=${currentPage}&limit=${limit}`)
       .then((response) => {
         setProducts(response.data.data.products);
+        setTotalPages(response.data.data.totalPages);
         setLoading(false);
       })
       .catch((error) => {
         console.log(error);
+        setLoading(false);
       });
-  }, []);
+  };
 
   const handleAddToCart = (productId) => {
     const token = localStorage.getItem('token');
@@ -40,6 +49,34 @@ const Home = () => {
       });
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  const handleSearch = () => {
+    if (searchId.trim() === '') {
+      fetchProducts();
+      return;
+    }
+
+    setLoading(true);
+    axios
+      .get(`http://localhost:5000/api/v1/products/${searchId}`)
+      .then((response) => {
+        setProducts([response.data.data.product]);
+        setTotalPages(1);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log('Error fetching product by ID:', error);
+        setLoading(false);
+      });
+  };
+
+  const handleCancelSearch = () => {
+    setSearchId('');
+    setCurrentPage(1);
+    fetchProducts();
+  };
   return (
     <>
       <Header />
@@ -50,9 +87,31 @@ const Home = () => {
             <MdOutlineAddBox className='text-sky-800 text-4xl' />
           </Link>
         </div>
+        <div className="flex mb-4">
+          <input
+            type="text"
+            placeholder="Search by Product ID"
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+            className="border border-gray-300 rounded px-4 py-2 mr-2"
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+          >
+            Search
+          </button>
+          <button
+            onClick={handleCancelSearch}
+            className="bg-gray-500 text-white px-4 py-2 rounded"
+          >
+            Cancel
+          </button>
+        </div>
         {loading ? (
           <Spinner />
         ) : (
+          <>
           <table className='w-full border-separate border-spacing-2'>
             <thead>
               <tr>
@@ -69,7 +128,7 @@ const Home = () => {
               {products.map((product, index) => (
                 <tr key={product.product_id} className='h-8'>
                   <td className='border border-slate-700 rounded-md text-center'>
-                    {index + 1}
+                    {(currentPage - 1) * limit + index + 1}
                   </td>
                   <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
                     {product.product_id}
@@ -108,6 +167,18 @@ const Home = () => {
               ))}
             </tbody>
           </table>
+          <div className='flex justify-center mt-4'>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button 
+                  key={index + 1} 
+                  onClick={() => handlePageChange(index + 1)} 
+                  className={`px-3 py-1 mx-1 ${index + 1 === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </>

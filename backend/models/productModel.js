@@ -26,7 +26,8 @@ export const getProductById = async (product_id) => {
   return result.rows[0];
 };
 
-export const getAllProducts = async () => {
-  const result = await db.query('SELECT * FROM product');
-  return result.rows;
+export const getAllProducts = async (limit, offset) => {
+  const result = await db.query('SELECT * FROM product LIMIT $1 OFFSET $2', [limit, offset]);
+  const total = await db.query('SELECT COUNT(*) FROM product');
+  return { rows: result.rows, rowCount: parseInt(total.rows[0].count, 10) };
 };
