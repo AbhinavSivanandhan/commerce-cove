@@ -14,12 +14,27 @@ const Home = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchId, setSearchId] = useState('');
   const [error, setError] = useState('');
+  const [role, setRole] = useState('');
 
   const limit = 10; // Number of products per page
+  // useEffect(() => {
+  //   // Log all items in localStorage for debugging
+  //   console.log('LocalStorage contents:');
+  //   for (let i = 0; i < localStorage.length; i++) {
+  //     const key = localStorage.key(i);
+  //     const value = localStorage.getItem(key);
+  //     console.log(`${key}: ${value}`);
+  //     }
+  //   }, [currentPage]);
 
   useEffect(() => {
+    const userRole = localStorage.getItem('role');
+    setRole(userRole);
+    console.log('userROle');
+    console.log(userRole);
     fetchProducts();
   }, [currentPage]);
+
   const fetchProducts = () => {
     setLoading(true);
     axios
@@ -60,8 +75,8 @@ const Home = () => {
       return;
     }
     else if (isNaN(searchId)) {
-      alert('Valid Product id should be numeric');
-      setError('Valid Product id should be numeric');
+      alert('Valid Product ID should be numeric');
+      setError('Valid Product ID should be numeric');
       return;
     }
     setLoading(true);
@@ -72,7 +87,7 @@ const Home = () => {
           setProducts([response.data.data.product]);
           setTotalPages(1);
           setError('');
-        } else{
+        } else {
           setProducts([]);
           setError('No records found with that ID. Click on cancel to view the full list again.');
         }
@@ -98,9 +113,11 @@ const Home = () => {
       <div className='p-4'>
         <div className="flex justify-between items-center">
           <h1 className="text-3xl my-8">Products List</h1>
+          {role !== 'customer' && (
           <Link to='/products/create'>
             <MdOutlineAddBox className='text-sky-800 text-4xl' />
           </Link>
+          )}
         </div>
         <div className="flex mb-4">
           <input
@@ -166,12 +183,16 @@ const Home = () => {
                       <Link to={`/products/details/${product.product_id}`}>
                         <BsInfoCircle className='text-2x1 text-green-800' />
                       </Link>
+                      {role !== 'customer' && (
+                      <>
                       <Link to={`/products/edit/${product.product_id}`}>
                         <AiOutlineEdit className='text-2x1 text-yellow-600' />
                       </Link>
                       <Link to={`/products/delete/${product.product_id}`}>
                         <MdOutlineDelete className='text-2x1 text-red-600' />
                       </Link>
+                      </>
+                      )}
                       <button 
                         onClick={() => handleAddToCart(product.product_id)} 
                         className='bg-emerald-500 text-white px-1 py-0.25 rounded'>

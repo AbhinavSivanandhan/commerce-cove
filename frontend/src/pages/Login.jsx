@@ -15,6 +15,7 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/v1/accounts/login', { username, password });
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role); // Store the user's role in localStorage
       setLoading(false);
       navigate('/');
     } catch (error) {
