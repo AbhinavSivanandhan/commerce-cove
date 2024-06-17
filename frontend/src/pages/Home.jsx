@@ -13,6 +13,8 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchId, setSearchId] = useState('');
+  const [error, setError] = useState('');
+
   const limit = 10; // Number of products per page
 
   useEffect(() => {
@@ -57,18 +59,30 @@ const Home = () => {
       fetchProducts();
       return;
     }
-
+    else if (isNaN(searchId)) {
+      alert('Valid Product id should be numeric');
+      setError('Valid Product id should be numeric');
+      return;
+    }
     setLoading(true);
     axios
       .get(`http://localhost:5000/api/v1/products/${searchId}`)
       .then((response) => {
-        setProducts([response.data.data.product]);
-        setTotalPages(1);
+        if (response.data.data.product) {
+          setProducts([response.data.data.product]);
+          setTotalPages(1);
+          setError('');
+        } else{
+          setProducts([]);
+          setError('No records found with that ID. Click on cancel to view the full list again.');
+        }
         setLoading(false);
       })
       .catch((error) => {
         console.log('Error fetching product by ID:', error);
         setLoading(false);
+        setProducts([]);
+        setError('No records found with that ID. Click on cancel to view the full list again.');
       });
   };
 
@@ -76,6 +90,7 @@ const Home = () => {
     setSearchId('');
     setCurrentPage(1);
     fetchProducts();
+    setError('');
   };
   return (
     <>
@@ -108,6 +123,7 @@ const Home = () => {
             Cancel
           </button>
         </div>
+        {error && <p className="text-red-500">{error}</p>}
         {loading ? (
           <Spinner />
         ) : (

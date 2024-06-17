@@ -10,6 +10,7 @@ const Cart = () => {
   const [showModal, setShowModal] = useState(false);
   const [address, setAddress] = useState('');
   const [contactDetails, setContactDetails] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,12 +75,13 @@ const Cart = () => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     const inStockItems = cartItems.filter(item => item.instock);
-    console.log('handle submit');
-    console.log(cartItems);
-    console.log(address);
-    console.log(contactDetails);
-    console.log(inStockItems);
-    console.log(token);
+
+    if (!address || !contactDetails || inStockItems.length === 0) {
+      setError('All fields are required and at least one in-stock item must be in cart.');
+      alert('All fields are required and at least one in-stock item must be in cart.');
+      return;
+    }
+
     axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details: contactDetails, inStockItems }, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -92,6 +94,7 @@ const Cart = () => {
     })
     .catch(error => {
       console.error('Error checking out', error);
+      setError(error.response ? error.response.data.message : 'Error checking out');
       alert('Error checking out');
     });
   };
