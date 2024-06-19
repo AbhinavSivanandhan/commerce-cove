@@ -1,17 +1,5 @@
-import { getActiveCartItems, insertOrder, deleteActiveCartItems } from '../models/orderModel.js';
-
-export const viewCart = async (req, res) => {
-  const userId = req.user.user_id;
-
-  try {
-    const cartItems = await getActiveCartItems(userId);
-    res.status(200).json({ status: 'success', data: cartItems });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: 'error', message: 'Error fetching cart' });
-  }
-};
-
+import { insertOrder, getOrderById, getAllOrders } from '../models/orderModel.js';
+import {deleteActiveCartItems} from '../models/cartModel.js'
 export const checkoutCart = async (req, res) => {
   const { address, contact_details, inStockItems } = req.body;
   const user_id = req.user.user_id;
@@ -26,5 +14,37 @@ export const checkoutCart = async (req, res) => {
   } catch (error) {
       console.error(error);
       res.status(500).json({ status: 'error', message: 'Error processing order' });
+  }
+};
+
+export const getAllOrdersController = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const { rows: orders, rowCount } = await getAllOrders(limit, offset);
+    const totalPages = Math.ceil(rowCount / limit);    
+    res.status(200).json({ 
+      status: "success", 
+      data: { 
+        orders, 
+        totalPages, 
+        currentPage: page 
+      } 
+    });
+    } catch (error) {
+    console.error('Error getting orders:', error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
+export const getOrderByIdController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await getOrderById(id);
+    res.status(200).json({ status: "success", data: { order } });
+  } catch (error) {
+    console.error('Error getting order:', error);
+    res.status(500).json({ status: "error", message: error.message });
   }
 };

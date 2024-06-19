@@ -26,3 +26,7 @@ export const deleteFromCartModel = async (product_id, user_id) => {
     );
     return result.rows[0];
 };
+
+export const deleteActiveCartItems = async (user_id) => {
+    await db.query(`DELETE FROM cart WHERE user_id = $1 AND status = 'active'`, [user_id]);
+  };

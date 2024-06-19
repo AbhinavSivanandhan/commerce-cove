@@ -10,7 +10,7 @@ import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductList from './pages/ProductList';
 import Cart from './pages/Cart';
-
+import OrderHistory from './pages/OrderHistory';
 const App = () => {
   return (
     <Routes>
@@ -23,6 +23,7 @@ const App = () => {
       <Route path='/products/delete/:id' element={<ProtectedRoute><DeleteProduct /></ProtectedRoute>} />
       <Route path='/products' element={<ProtectedRoute><ProductList /></ProtectedRoute>} />
       <Route path='/cart' element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+      <Route path='/orderhistory' element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
     </Routes>
   )
 }

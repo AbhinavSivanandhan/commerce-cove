@@ -1,16 +1,5 @@
 import db from '../db/index.js';
 
-export const getActiveCartItems = async (user_id) => {
-  const result = await db.query(
-    `SELECT c.product_id, p.description, p.price, c.quantity, p.instock 
-     FROM cart c 
-     JOIN product p ON c.product_id = p.product_id 
-     WHERE c.user_id = $1 AND c.status = 'active'`,
-    [user_id]
-  );
-  return result.rows;
-};
-
 export const insertOrder = async (user_id, product_id, quantity, total_price, address, contact_details) => {
   const result = await db.query(
     `INSERT INTO order_history (user_id, product_id, quantity, total_price, address, contact_details) 
@@ -20,6 +9,13 @@ export const insertOrder = async (user_id, product_id, quantity, total_price, ad
   return result.rows[0];
 };
 
-export const deleteActiveCartItems = async (user_id) => {
-  await db.query(`DELETE FROM cart WHERE user_id = $1 AND status = 'active'`, [user_id]);
+export const getAllOrders = async (limit, offset) => {
+  const result = await db.query('SELECT * FROM order_history LIMIT $1 OFFSET $2', [limit, offset]);
+  const total = await db.query('SELECT COUNT(*) FROM order_history');
+  return { rows: result.rows, rowCount: parseInt(total.rows[0].count, 10) };
+};
+
+export const getOrderById = async (order_id) => {
+  const result = await db.query('SELECT * FROM order_history WHERE order_id = $1', [order_id]);
+  return result.rows[0];
 };
