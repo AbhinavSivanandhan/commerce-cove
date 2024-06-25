@@ -4,7 +4,7 @@ import Spinner from '../components/Spinner';
 import { Link } from 'react-router-dom';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { BsInfoCircle } from 'react-icons/bs';
-import { MdOutlineAddBox, MdOutlineDelete, MdOutlineAddShoppingCart} from 'react-icons/md';
+import { MdOutlineAddBox, MdOutlineDelete, MdOutlineAddShoppingCart, MdRemoveShoppingCart} from 'react-icons/md';
 import Header from '../components/Header';
 
 const Home = () => {
@@ -15,7 +15,7 @@ const Home = () => {
   const [searchId, setSearchId] = useState('');
   const [error, setError] = useState('');
   const [role, setRole] = useState('');
-
+  const [cartItems, setCartItems] = useState([]);
   const limit = 10; // Number of products per page
   // useEffect(() => {
   //   // Log all items in localStorage for debugging
@@ -33,6 +33,7 @@ const Home = () => {
     console.log('userROle');
     console.log(userRole);
     fetchProducts();
+    fetchCartItems();
   }, [currentPage]);
 
   const fetchProducts = () => {
@@ -50,6 +51,20 @@ const Home = () => {
       });
   };
 
+  const fetchCartItems = () => {
+    const token = localStorage.getItem('token');
+    axios
+      .get('http://localhost:5000/api/v1/carts/view', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        setCartItems(response.data.data);
+      })
+      .catch((error) => {
+        console.log('Error fetching cart items', error);
+      });
+
+  };
   const handleAddToCart = (productId) => {
     const token = localStorage.getItem('token');
     axios
@@ -60,10 +75,34 @@ const Home = () => {
       )
       .then((response) => {
         console.log('Product added to cart:', response.data);
+        fetchCartItems();
       })
       .catch((error) => {
         console.log('Error adding product to cart:', error);
       });
+  };
+
+  const handleRemoveFromCart = (productId) => {
+    const token = localStorage.getItem('token');
+    axios
+      .delete(`http://localhost:5000/api/v1/carts/delete/${productId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        console.log('Product removed from cart:', response.data);
+        fetchCartItems(); // Refresh cart items after removing
+      })
+      .catch((error) => {
+        console.log('Error removing product from cart:', error);
+      });
+  };
+
+  const handleCartToggle = (productId) => {
+    if (isInCart(productId)) {
+      handleRemoveFromCart(productId);
+    } else {
+      handleAddToCart(productId);
+    }
   };
 
   const handlePageChange = (page) => {
@@ -107,6 +146,11 @@ const Home = () => {
     fetchProducts();
     setError('');
   };
+
+  const isInCart = (productId) => {
+    return cartItems.some((item) => item.product_id === productId);
+  };
+
   return (
     <>
       <Header />
@@ -194,9 +238,11 @@ const Home = () => {
                       </>
                       )}
                       <button 
-                        onClick={() => handleAddToCart(product.product_id)} 
-                        className='bg-emerald-500 text-white px-1 py-0.25 rounded'>
-                        <MdOutlineAddShoppingCart />
+                        onClick={() => handleCartToggle(product.product_id)} 
+                        className={`px-1 py-0.25 rounded ${
+                          isInCart(product.product_id) ? 'bg-red-500' : 'bg-emerald-500'
+                        } text-white`}>
+                        {isInCart(product.product_id) ? <MdRemoveShoppingCart /> : <MdOutlineAddShoppingCart />}
                       </button>
                     </div>
                   </td>
