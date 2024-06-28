@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
-
+import {loadStripe} from '@stripe/stripe-js';
 const Cart = () => {
+  const stripePromise = loadStripe('pk_test_51PWMd8Ron26oqThkOjUtJ4jPGKy9qPogXwxOyBQ3ENGV7QJO5uFzXm7m62KypNy2VkyOSYohOQRcs0spHsjsisq3003vNjNB7O');
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -11,6 +12,7 @@ const Cart = () => {
   const [address, setAddress] = useState('');
   const [contactDetails, setContactDetails] = useState('');
   const [error, setError] = useState('');
+  const [codChecked, setCodChecked] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const Cart = () => {
       item.product_id === product_id ? { ...item, quantity: parseInt(quantity) } : item
     );
     setCartItems(updatedItems);
+    console.log(cartItems);
   };
 
   const handleDelete = (product_id) => {
@@ -70,6 +73,39 @@ const Cart = () => {
   const handleCheckoutClick = () => {
     setShowModal(true);
   };
+
+  const handleCODToggle = () => {
+    setCodChecked(!codChecked);
+  };
+
+  const makePayment = async () => {
+    const stripe = await stripePromise;
+    const body = {
+      products: cartItems
+    }
+    const headers = {
+      "Content-Type": "application/json"
+    }
+    try {
+    const response = await fetch(`http://localhost:5000/create-checkout-session`,{
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create checkout session');
+    }
+    const session = await response.json();
+    const result = stripe.redirectToCheckout({
+      sessionId:session.id
+    });
+    if(result.error){
+      console.log(result.error.message);
+    }
+  } catch(error){
+    console.error('Error during payment:', error);
+    }
+  }
 
   const handleCheckoutSubmit = (e) => {
     e.preventDefault();
@@ -130,8 +166,15 @@ const Cart = () => {
       </ul>
       <div className="mt-6">
         <h2 className="text-2xl font-semibold">Total: ${total.toFixed(2)}</h2>
-        <button onClick={handleCheckoutClick} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-          Checkout
+        <div className="flex items-center mt-4">
+        <input type="checkbox" id="codCheckbox" checked={codChecked} onChange={handleCODToggle} className="mr-2" />
+        <label htmlFor="codCheckbox">Cash on Delivery</label>
+        </div>
+        <button onClick={handleCheckoutClick} disabled={!codChecked} className={`mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${!codChecked && 'opacity-50 cursor-not-allowed'}`}>
+        Checkout ${total.toFixed(2)}
+        </button>
+        <button onClick={makePayment} disabled={codChecked} className={`mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ${codChecked && 'opacity-50 cursor-not-allowed'}`}>
+          Pay ${total.toFixed(2)}
         </button>
       </div>
       {showModal && (

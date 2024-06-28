@@ -11,6 +11,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProductList from './pages/ProductList';
 import Cart from './pages/Cart';
 import OrderHistory from './pages/OrderHistory';
+import Success from './pages/Success';
+import Cancel from './pages/Cancel';
 const App = () => {
   return (
     <Routes>
@@ -24,6 +26,8 @@ const App = () => {
       <Route path='/products' element={<ProtectedRoute><ProductList /></ProtectedRoute>} />
       <Route path='/cart' element={<ProtectedRoute><Cart /></ProtectedRoute>} />
       <Route path='/orderhistory' element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+      <Route path='/success' element={<ProtectedRoute><Success /></ProtectedRoute>} />
+      <Route path='/cancel' element={<ProtectedRoute><Cancel /></ProtectedRoute>} />
     </Routes>
   )
 }

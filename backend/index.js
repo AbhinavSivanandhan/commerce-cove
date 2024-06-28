@@ -7,8 +7,9 @@ import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import errorHandler from './middleware/errorMiddleware.js'; // Import error handler
-
+import Stripe from 'stripe';
 dotenv.config();
+const stripe = new Stripe(process.env.STRIPE_SECRET)
 
 // Database setup
 import setupDatabase from './db/setupdb.js';
@@ -34,6 +35,37 @@ app.use('/api/v1/orders', orderRoutes);
 app.get('/', (request, response) => {
   return response.send('Welcome to CommerceCove');
 });
+
+app.post('/create-checkout-session', async (request, response) => {
+  const { products } = request.body;
+
+  // Construct line items for the checkout session
+  const lineItems = products.map((product) => ({
+    price_data: {
+      currency: 'usd',
+      product_data: {
+        name: product.description,  // Adjust to match your product structure
+      },
+      unit_amount: Math.round(product.price * 100),  // Stripe expects the amount in cents
+    },
+    quantity: product.quantity,
+  }));
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: 'http://localhost:5173/success',
+      cancel_url: 'http://localhost:5173/cancel',
+    });
+    response.json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating Stripe session:', error);
+    response.status(500).json({ error: 'Failed to create checkout session' });
+  }
+});
+
 
 // Error handling middleware
 app.use(errorHandler);
