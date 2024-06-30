@@ -80,8 +80,10 @@ const Cart = () => {
 
   const makePayment = async () => {
     const stripe = await stripePromise;
+    const inStockItems = cartItems.filter(item => item.instock);
+
     const body = {
-      products: cartItems
+      products: inStockItems
     }
     const headers = {
       "Content-Type": "application/json"
