@@ -108,12 +108,35 @@ const Cart = () => {
     console.error('Error during payment:', error);
     }
   }
+  const updateOrderStatus = (orderIds, status) => {
+    const token = localStorage.getItem('token');
+    const data = {
+      orderIds,
+      status
+    }
+    console.log('data payload of update:',JSON.stringify(data, null, 2));
+    axios
+    .put('http://localhost:5000/api/v1/orders/updateStatus', data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+    })
+    .then(response => {
+      console.log(response);
+      console.log('Order status updated successfully', response.data);
 
-  const handleCheckoutSubmit = (e) => {
+    })
+    .catch(error => {
+      console.error('Error updating order status', error);
+      setLoading(false);
+    });
+
+  }
+  const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+    let orderIds = [];
     const inStockItems = cartItems.filter(item => item.instock);
-
     if (!address || !contactDetails || inStockItems.length === 0) {
       setError('All fields are required and at least one in-stock item must be in cart.');
       alert('All fields are required and at least one in-stock item must be in cart.');
@@ -127,14 +150,23 @@ const Cart = () => {
     })
     .then(response => {
       alert('Order placed successfully');
+      console.log(JSON.stringify(response.data.orders, null, 2));
+      // orderId=response.data.orders[0].order_id;
+      console.log('orderIds:');
+      orderIds = response.data.orders.map(order => order.order_id);
+      console.log(orderIds);
       setShowModal(false);
-      navigate('/');
     })
     .catch(error => {
       console.error('Error checking out', error);
       setError(error.response ? error.response.data.message : 'Error checking out');
       alert('Error checking out');
     });
+    if(!codChecked){
+      await makePayment();
+      updateOrderStatus(orderIds, 'paid');
+    } 
+    navigate('/');
   };
 
   if (loading) return <p>Loading...</p>;
@@ -175,7 +207,7 @@ const Cart = () => {
         <button onClick={handleCheckoutClick} disabled={!codChecked} className={`mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${!codChecked && 'opacity-50 cursor-not-allowed'}`}>
         Checkout ${total.toFixed(2)}
         </button>
-        <button onClick={makePayment} disabled={codChecked} className={`mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ${codChecked && 'opacity-50 cursor-not-allowed'}`}>
+        <button onClick={handleCheckoutClick} disabled={codChecked} className={`mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ${codChecked && 'opacity-50 cursor-not-allowed'}`}>
           Pay ${total.toFixed(2)}
         </button>
       </div>

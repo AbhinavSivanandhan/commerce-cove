@@ -1,4 +1,4 @@
-import { insertOrder, getOrderById, getAllOrders } from '../models/orderModel.js';
+import { insertOrder, getOrderById, getAllOrders, updateOrderStatusById } from '../models/orderModel.js';
 import {deleteActiveCartItems} from '../models/cartModel.js'
 export const checkoutCart = async (req, res) => {
   const { address, contact_details, inStockItems } = req.body;
@@ -10,7 +10,7 @@ export const checkoutCart = async (req, res) => {
     );
     const orders = await Promise.all(orderPromises);
     await deleteActiveCartItems(user_id);
-    res.status(201).json({ status: 'success', data: orders });
+    res.status(201).json({ status: 'success', orders: orders });
   } catch (error) {
       console.error(error);
       res.status(500).json({ status: 'error', message: 'Error processing order' });
@@ -48,3 +48,15 @@ export const getOrderByIdController = async (req, res) => {
     res.status(500).json({ status: "error", message: error.message });
   }
 };
+
+export const updateOrderStatusController = async (req,res) => {
+  try {
+    const { orderIds, status } = req.body; // Change orderId to orderIds
+    const updatePromises = orderIds.map(orderId => updateOrderStatusById(orderId, status)); // Create an array of promises
+    const updatedOrders = await Promise.all(updatePromises); // Wait for all promises to resolve
+    res.status(200).json({ status: "success", data: { orders: updatedOrders } });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+}
