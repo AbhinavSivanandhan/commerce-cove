@@ -78,13 +78,14 @@ const Cart = () => {
     setCodChecked(!codChecked);
   };
 
-  const makePayment = async () => {
+  const makePayment = async (orderIds) => {
     const stripe = await stripePromise;
     const inStockItems = cartItems.filter(item => item.instock);
 
     const body = {
-      products: inStockItems
-    }
+      products: inStockItems,
+      orderIds: orderIds
+    };
     const headers = {
       "Content-Type": "application/json"
     }
@@ -103,9 +104,12 @@ const Cart = () => {
     });
     if(result.error){
       console.log(result.error.message);
+      return false;
     }
+    return true;
   } catch(error){
     console.error('Error during payment:', error);
+    return false;
     }
   }
   const updateOrderStatus = (orderIds, status) => {
@@ -142,32 +146,39 @@ const Cart = () => {
       alert('All fields are required and at least one in-stock item must be in cart.');
       return;
     }
-
-    axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details: contactDetails, inStockItems }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then(response => {
+  
+    try {
+      const response = await axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details: contactDetails, inStockItems }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       alert('Order placed successfully');
       console.log(JSON.stringify(response.data.orders, null, 2));
-      // orderId=response.data.orders[0].order_id;
-      console.log('orderIds:');
+      // Extracting order IDs
       orderIds = response.data.orders.map(order => order.order_id);
-      console.log(orderIds);
+      console.log('Order IDs:', orderIds);
+      
       setShowModal(false);
-    })
-    .catch(error => {
+  
+      if (!codChecked) {
+        const paymentSuccessful = await makePayment(orderIds);
+        if (paymentSuccessful) {
+          // Do not update the order status here, it will be updated via success page
+          console.log('Redirected to Stripe checkout');
+        }
+      } else {
+        // Directly update the order status if COD is selected
+        await updateOrderStatus(orderIds, 'cod');
+        alert('Order placed successfully with COD');
+        navigate('/');
+      }
+    } catch (error) {
       console.error('Error checking out', error);
       setError(error.response ? error.response.data.message : 'Error checking out');
       alert('Error checking out');
-    });
-    if(!codChecked){
-      await makePayment();
-      updateOrderStatus(orderIds, 'paid');
-    } 
-    navigate('/');
-  };
+    }
+  };  
 
   if (loading) return <p>Loading...</p>;
 

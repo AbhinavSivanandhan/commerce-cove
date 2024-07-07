@@ -37,8 +37,7 @@ app.get('/', (request, response) => {
 });
 
 app.post('/create-checkout-session', async (request, response) => {
-  const { products } = request.body;
-
+  const { products, orderIds } = request.body;
   // Construct line items for the checkout session
   const lineItems = products.map((product) => ({
     price_data: {
@@ -56,7 +55,7 @@ app.post('/create-checkout-session', async (request, response) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: 'http://localhost:5173/success',
+      success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}&orderIds=${encodeURIComponent(JSON.stringify(orderIds))}`,
       cancel_url: 'http://localhost:5173/cancel',
     });
     response.json({ id: session.id });
