@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import {loadStripe} from '@stripe/stripe-js';
+import { toast } from 'react-toastify';
 const Cart = () => {
   const stripePromise = loadStripe('pk_test_51PWMd8Ron26oqThkOjUtJ4jPGKy9qPogXwxOyBQ3ENGV7QJO5uFzXm7m62KypNy2VkyOSYohOQRcs0spHsjsisq3003vNjNB7O');
   const [cartItems, setCartItems] = useState([]);
@@ -67,6 +68,7 @@ const Cart = () => {
     })
     .catch(error => {
       console.error('Error deleting item', error);
+      toast.error('Failed to delete item from cart');
     });
   };
 
@@ -153,7 +155,8 @@ const Cart = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      alert('Order placed successfully');
+      // alert('Order placed successfully');
+      toast.success('Order created!');
       console.log(JSON.stringify(response.data.orders, null, 2));
       // Extracting order IDs
       orderIds = response.data.orders.map(order => order.order_id);
@@ -170,7 +173,7 @@ const Cart = () => {
       } else {
         // Directly update the order status if COD is selected
         await updateOrderStatus(orderIds, 'cod');
-        alert('Order placed successfully with COD');
+        toast.success('Order placed successfully with COD');
         navigate('/');
       }
     } catch (error) {
