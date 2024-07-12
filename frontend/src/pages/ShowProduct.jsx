@@ -29,7 +29,7 @@ const ShowProduct = () => {
   return (
     <div className='p-4'>
       <BackButton />
-      <h1 className='text-3xl my-4'>Showing Product Details...</h1>
+      <h1 className='text-3xl my-4'>Showing Product Details:</h1>
       {loading?(<Spinner />):(
         product && (
         <div className='flex flex-col border-2 border-sky-bg-400 rounded-xl w-fit p-4'>

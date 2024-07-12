@@ -24,6 +24,12 @@ const CreateProduct = () => {
     setLoading(true);
     const token = localStorage.getItem('token');
     console.log(data);
+    console.log(token);
+    console.log('price');
+
+    console.log(price);
+    console.log(typeof price);
+    console.log('so now you knw');
     axios
       .post('http://localhost:5000/api/v1/products', data, {
         headers: {
@@ -32,6 +38,8 @@ const CreateProduct = () => {
       })
       .then(()=>{
         setLoading(false);
+        console.log('created product!');
+
         navigate('/');
       })
       .catch((error)=>{
@@ -48,7 +56,7 @@ const CreateProduct = () => {
       <div className='flex flex-col border-2 border-sky-bg-400 rounded-xl w-fit p-4'>
 
           <div className='my-4'>
-            <label className='text-xl mr-4 text-gray-500'>S-Id</label>
+            <label className='text-xl mr-4 text-gray-500'>Seller-Id</label>
             <input
               type='number'
               value={seller_id}
@@ -79,7 +87,7 @@ const CreateProduct = () => {
             <input
               type='number'
               value={price}
-              onChange={(e)=>setPrice(e.target.value)}
+              onChange={(e)=>setPrice(parseFloat(e.target.value) || 0)}
               className='border-2 border-gray-500 px-4 py-2 w-full'
               min='0'
               step='0.1'

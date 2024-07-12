@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 
 const Success = () => {
   const navigate = useNavigate();
@@ -49,9 +50,32 @@ const Success = () => {
   }, [navigate]);
 
   return (
-    <div className='bg-green-500'>
-      Success
+    <>
+    <Header /> 
+
+    <div className='min-h-screen flex flex-col items-center justify-center bg-green-500'>
+
+
+      <div className="text-center">
+
+        <h1 className="text-4xl font-bold mb-4">Success!</h1>
+
+        <p className="text-lg mb-4">
+
+          Your order has been placed and the payment has been completed successfully.
+
+        </p>
+
+        <p className="text-lg">
+
+          You will be redirected to the Home page in a few seconds.
+
+        </p>
+
+      </div>
+
     </div>
+    </>
   );
 };
 

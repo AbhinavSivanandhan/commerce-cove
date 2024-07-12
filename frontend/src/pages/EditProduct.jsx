@@ -111,7 +111,7 @@ const EditProduct = () => {
             <input
               type='number'
               value={price}
-              onChange={(e)=>setPrice(e.target.value)}
+              onChange={(e)=>setPrice(parseFloat(e.target.value) || 0)}
               className='border-2 border-gray-500 px-4 py-2 w-full'
               min='0'
               step='0.1'
