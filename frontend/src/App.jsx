@@ -32,7 +32,7 @@ const App = () => {
         <Route path='/success' element={<ProtectedRoute><Success /></ProtectedRoute>} />
         <Route path='/cancel' element={<ProtectedRoute><Cancel /></ProtectedRoute>} />
       </Routes>
-      <ToastContainer autoClose={4000}/>
+      <ToastContainer autoClose={2500}/>
     </>
   )
 }

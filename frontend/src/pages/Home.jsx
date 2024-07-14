@@ -114,7 +114,7 @@ const Home = () => {
       return;
     }
     else if (isNaN(searchId)) {
-      alert('Valid Product ID should be numeric');
+      toast.error('Valid Product ID should be numeric');
       setError('Valid Product ID should be numeric');
       return;
     }

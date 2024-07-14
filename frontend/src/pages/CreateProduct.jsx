@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import Spinner from '../components/Spinner'
+import { toast } from 'react-toastify';
 
 const CreateProduct = () => {
   const [description, setDesc] = useState('');
@@ -39,12 +40,12 @@ const CreateProduct = () => {
       .then(()=>{
         setLoading(false);
         console.log('created product!');
-
+        toast.success('Product created!');
         navigate('/');
       })
       .catch((error)=>{
         setLoading(false);
-        alert('Error! Please check console');
+        toast.error('Error! Please check console');
         console.log(error);
       });
   };

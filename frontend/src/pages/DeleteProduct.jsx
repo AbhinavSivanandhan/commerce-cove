@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import Spinner from '../components/Spinner'
+import { toast } from 'react-toastify';
 
 const DeleteProduct = () => {
   const [loading, setLoading] = useState(false);
@@ -19,11 +20,12 @@ const DeleteProduct = () => {
     })
     .then(()=>{
       setLoading(false);
+      toast.success('Product deleted!');
       navigate('/');
     })
     .catch((error)=>{
       setLoading(false);
-      alert('Error! Check console');
+      toast.error('Error! Check console');
       console.log(error);
     })
   }; 

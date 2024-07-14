@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import Spinner from '../components/Spinner'
+import Header from '../components/Header';
  
 const ShowProduct = () => {
   const [product, setProduct] = useState(null);
@@ -27,40 +28,49 @@ const ShowProduct = () => {
   }, [id])
 
   return (
+    <>
+    <Header />
     <div className='p-4'>
       <BackButton />
-      <h1 className='text-3xl my-4'>Showing Product Details:</h1>
       {loading?(<Spinner />):(
         product && (
-        <div className='flex flex-col border-2 border-sky-bg-400 rounded-xl w-fit p-4'>
-          <div className='my-4'>
-            <span className='text-xl mr-4 text-gray-500'>Id</span>
-            <span>{product.product_id}</span>
-          </div>
-          <div className='my-4'>
-            <span className='text-xl mr-4 text-gray-500'>description</span>
-            <span>{product.description}</span>
-          </div>
-          <div className='my-4'>
-            <span className='text-xl mr-4 text-gray-500'>price</span>
-            <span>{product.price}</span>
-          </div>
-          <div className='my-4'>
-            <span className='text-xl mr-4 text-gray-500'>instock</span>
-            <span>{product.instock ? 'Yes' : 'No'}</span>
-          </div>
-          <div className='my-4'>
-            <span className='text-xl mr-4 text-gray-500'>S-Id</span>
-            <span>{product.seller_id}</span>
-          </div>
-          <div className='my-4'>
-            <span className='text-xl mr-4 text-gray-500'>Company Name</span>
-            <span>{product.companyname}</span>
-          </div>
-        </div>
+          <table className="mt-4 w-full border-collapse border border-slate-600 bg-white shadow-md rounded-lg">
+          <thead>
+            <tr className="bg-gray-50 text-black">
+              <th className="py-2 px-4 text-center text-lg" colSpan="2">Showing Product Details for: {product.description} ( By {product.companyname} )</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-t border-slate-600">
+              <td className="py-2 px-4 font-semibold text-slate-700">ID</td>
+              <td className="py-2 px-4">{product.product_id}</td>
+            </tr>
+            <tr className="border-t border-slate-600 bg-slate-50">
+              <td className="py-2 px-4 font-semibold text-slate-700">Description</td>
+              <td className="py-2 px-4">{product.description}</td>
+            </tr>
+            <tr className="border-t border-slate-600">
+              <td className="py-2 px-4 font-semibold text-slate-700">Price</td>
+              <td className="py-2 px-4">{product.price}</td>
+            </tr>
+            <tr className="border-t border-slate-600 bg-slate-50">
+              <td className="py-2 px-4 font-semibold text-slate-700">In Stock</td>
+              <td className="py-2 px-4">{product.instock ? 'Yes' : 'No'}</td>
+            </tr>
+            <tr className="border-t border-slate-600">
+              <td className="py-2 px-4 font-semibold text-slate-700">S-Id</td>
+              <td className="py-2 px-4">{product.seller_id}</td>
+            </tr>
+            <tr className="border-t border-slate-600 bg-slate-50">
+              <td className="py-2 px-4 font-semibold text-slate-700">Company Name</td>
+              <td className="py-2 px-4">{product.companyname}</td>
+            </tr>
+          </tbody>
+        </table>        
         )
       )}
     </div>
+    </>
   )
 }
 

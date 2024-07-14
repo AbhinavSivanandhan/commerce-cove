@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import Spinner from '../components/Spinner';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -20,7 +21,7 @@ const Register = () => {
     } catch (error) {
       console.log(error);
       setLoading(false);
-      alert('Registration failed');
+      toast.error('Registration failed');
     }
   };
 

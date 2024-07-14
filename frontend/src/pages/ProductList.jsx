@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -23,11 +24,11 @@ const ProductList = () => {
       }
     })
     .then(response => {
-      alert('Added to cart');
+      toast.success('Added to cart');
     })
     .catch(error => {
       console.error('Error adding to cart', error);
-      alert('Error adding to cart');
+      toast.error('Error adding to cart');
     });
   };
 

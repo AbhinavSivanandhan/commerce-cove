@@ -3,11 +3,12 @@ import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import Spinner from '../components/Spinner'
+import { toast } from 'react-toastify';
 
 const EditProduct = () => {
   const [product_id, setPid] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState(0);
   const [instock, setInstock] = useState(false);
   const [companyname, setCompanyname] = useState('');
   const [seller_id, setSid] = useState('');
@@ -22,14 +23,14 @@ const EditProduct = () => {
       console.log(response);
       setPid(response.data.data.product.product_id);
       setDescription(response.data.data.product.description);
-      setPrice(response.data.data.product.price);
+      setPrice(parseFloat(response.data.data.product.price));
       setInstock(response.data.data.product.instock);
       setCompanyname(response.data.data.product.companyname);
       setSid(response.data.data.product.seller_id);
       setLoading(false);
     }).catch((error)=>{
       setLoading(false);
-      alert('Error! Please check console');
+      toast.error('Error! Please check console');
       console.log(error);
     })
   }, [])
@@ -55,11 +56,12 @@ const EditProduct = () => {
     })
       .then(()=>{
         setLoading(false);
+        toast.success('Product details edited!');
         navigate('/');
       })
       .catch((error)=>{
         setLoading(false);
-        alert('Error! Please check console');
+        toast.error('Error! Please check console');
         console.log(error);
       });
   };

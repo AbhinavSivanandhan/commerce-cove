@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaShoppingCart } from "react-icons/fa";
 import { IoReceiptSharp } from "react-icons/io5";
+import { toast } from 'react-toastify';
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -47,6 +48,8 @@ const Header = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setUsername('');
+    toast.success('Logged Out!');
+
     navigate('/');
   };
 

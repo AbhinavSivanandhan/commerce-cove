@@ -145,7 +145,7 @@ const Cart = () => {
     const inStockItems = cartItems.filter(item => item.instock);
     if (!address || !contactDetails || inStockItems.length === 0) {
       setError('All fields are required and at least one in-stock item must be in cart.');
-      alert('All fields are required and at least one in-stock item must be in cart.');
+      toast.error('All fields are required and at least one in-stock item must be in cart.');
       return;
     }
   
@@ -156,7 +156,6 @@ const Cart = () => {
         }
       });
       // alert('Order placed successfully');
-      toast.success('Order created!');
       console.log(JSON.stringify(response.data.orders, null, 2));
       // Extracting order IDs
       orderIds = response.data.orders.map(order => order.order_id);
@@ -179,7 +178,7 @@ const Cart = () => {
     } catch (error) {
       console.error('Error checking out', error);
       setError(error.response ? error.response.data.message : 'Error checking out');
-      alert('Error checking out');
+      toast.error('Error checking out');
     }
   };  
 

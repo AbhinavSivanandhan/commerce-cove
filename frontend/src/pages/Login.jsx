@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import Spinner from '../components/Spinner';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -17,11 +18,12 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', response.data.role); // Store the user's role in localStorage
       setLoading(false);
+      toast.success('Welcome!');
       navigate('/');
     } catch (error) {
       console.log(error);
       setLoading(false);
-      alert('Invalid credentials');
+      toast.error('Invalid Credentials!');
     }
   };
 
