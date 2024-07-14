@@ -15,6 +15,12 @@ export const getAllOrders = async (limit, offset) => {
   return { rows: result.rows, rowCount: parseInt(total.rows[0].count, 10) };
 };
 
+export const getMyOrders = async (user_id, limit, offset) => {
+  const result = await db.query('SELECT * FROM order_history where user_id=$1 LIMIT $2 OFFSET $3', [user_id, limit, offset]);
+  const total = await db.query('SELECT COUNT(*) FROM order_history where user_id=$1',[user_id]);
+  return { rows: result.rows, rowCount: parseInt(total.rows[0].count, 10) };
+};
+
 export const getOrderById = async (order_id) => {
   const result = await db.query('SELECT * FROM order_history WHERE order_id = $1', [order_id]);
   return result.rows[0];

@@ -1,4 +1,4 @@
-import { insertOrder, getOrderById, getAllOrders, updateOrderStatusById } from '../models/orderModel.js';
+import { insertOrder, getOrderById, getAllOrders, getMyOrders, updateOrderStatusById } from '../models/orderModel.js';
 import {deleteActiveCartItems} from '../models/cartModel.js'
 export const checkoutCart = async (req, res) => {
   const { address, contact_details, inStockItems } = req.body;
@@ -37,6 +37,31 @@ export const getAllOrdersController = async (req, res) => {
     res.status(500).json({ status: "error", message: error.message });
   }
 };
+
+export const getMyOrdersController = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+    console.log('user details in myorderctlr');
+    console.log(req.user);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const { rows: orders, rowCount } = await getMyOrders(user_id, limit, offset);
+    const totalPages = Math.ceil(rowCount / limit);    
+    res.status(200).json({ 
+      status: "success", 
+      data: { 
+        orders, 
+        totalPages, 
+        currentPage: page 
+      } 
+    });
+    } catch (error) {
+    console.error('Error getting my orders:', error);
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
+
 
 export const getOrderByIdController = async (req, res) => {
   try {

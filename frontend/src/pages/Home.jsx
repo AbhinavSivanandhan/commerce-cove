@@ -30,7 +30,6 @@ const Home = () => {
   useEffect(() => {
     const userRole = localStorage.getItem('role');
     setRole(userRole);
-    console.log('userROle');
     console.log(userRole);
     fetchProducts();
     fetchCartItems();

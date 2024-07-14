@@ -19,7 +19,7 @@ const OrderHistory = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         axios
-          .get(`http://localhost:5000/api/v1/orders?page=${currentPage}&limit=${limit}`, {
+          .get(`http://localhost:5000/api/v1/orders/myOrders?page=${currentPage}&limit=${limit}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
