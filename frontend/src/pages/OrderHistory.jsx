@@ -3,6 +3,7 @@ import axios from 'axios';
 import Spinner from '../components/Spinner';
 import Header from '../components/Header';
 import { toast } from 'react-toastify';
+import BackButton from '../components/BackButton';
 
 const OrderHistory = () => {
     const [orders, setOrders] = useState([]);
@@ -106,6 +107,7 @@ const OrderHistory = () => {
     <>
     <Header />
     <div className='p-4'>
+      <BackButton />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl my-8">Orders List</h1>
 
