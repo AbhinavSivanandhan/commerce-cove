@@ -6,33 +6,29 @@ import Spinner from '../components/Spinner'
 import { toast } from 'react-toastify';
 
 const CreateProduct = () => {
-  const [description, setDesc] = useState('');
-  const [seller_id, setSid] = useState('');
-  const [companyname, setCompanyname] = useState('');
-  const [price, setPrice] = useState('');
-  const [instock, setInstock] = useState(false);
+  const [product, setProduct] = useState({
+    description: '',
+    price: 0,
+    instock: false,
+    seller_id: '',
+    companyname: ''
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setProduct(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : type === 'radio' ? value === 'true' : type === 'number' ? parseFloat(value) : value
+    }));
+  }
+
   const handleSaveProduct = () => {
-    const data = {
-      description,
-      seller_id,
-      companyname,
-      price,
-      instock
-    };
     setLoading(true);
     const token = localStorage.getItem('token');
-    console.log(data);
-    console.log(token);
-    console.log('price');
-
-    console.log(price);
-    console.log(typeof price);
-    console.log('so now you knw');
     axios
-      .post('http://localhost:5000/api/v1/products', data, {
+      .post('http://localhost:5000/api/v1/products', product, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -59,36 +55,40 @@ const CreateProduct = () => {
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Seller-Id</label>
             <input
+              name='seller_id'
               type='number'
-              value={seller_id}
-              onChange={(e)=>setSid(e.target.value)}
+              value={product.seller_id}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
             />
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>description</label>
             <input
+              name='description'
               type='text'
-              value={description}
-              onChange={(e)=>setDesc(e.target.value)}
+              value={product.description}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
             />
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Company Name</label>
             <input
+              name='companyname'
               type='text'
-              value={companyname}
-              onChange={(e)=>setCompanyname(e.target.value)}
+              value={product.companyname}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
             />
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Price</label>
             <input
+              name='price'
               type='number'
-              value={price}
-              onChange={(e)=>setPrice(parseFloat(e.target.value) || 0)}
+              value={product.price}
+              onChange={(e)=> handleInputChange({...e, value: parseFloat(e.target.value) || 0 })}
               className='border-2 border-gray-500 px-4 py-2 w-full'
               min='0'
               step='0.1'
@@ -96,12 +96,26 @@ const CreateProduct = () => {
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>In Stock</label>
-            <input
-            type='checkbox'
-            checked={instock} 
-            onChange={() => setInstock(!instock)}
-            className='border-2 border-gray-500 px-4 py-2 w-full'
-          />
+            <div className='flex items-center'>
+              <input
+                type='radio'
+                name='instock'
+                value='true'
+                checked={product.instock === true}
+                onChange={handleInputChange}
+                className='mr-2'
+              />
+              <label className='mr-4'>Yes</label>
+              <input
+                type='radio'
+                name='instock'
+                value='false'
+                checked={product.instock === false}
+                onChange={handleInputChange}
+                className='mr-2'
+                />
+                <label>No</label>
+            </div>
           </div>
           <button className='p-2 bg-sky-300 m-8' onClick={handleSaveProduct}>Save</button>
       </div>
