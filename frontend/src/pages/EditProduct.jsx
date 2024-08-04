@@ -6,12 +6,14 @@ import Spinner from '../components/Spinner'
 import { toast } from 'react-toastify';
 
 const EditProduct = () => {
-  const [product_id, setPid] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState(0);
-  const [instock, setInstock] = useState(false);
-  const [companyname, setCompanyname] = useState('');
-  const [seller_id, setSid] = useState('');
+  const [product, setProduct] = useState({
+    product_id: '',
+    description: '',
+    price: 0,
+    instock: false,
+    companyname: '',
+    seller_id: ''
+  });
   const [loading, setLoading] = useState(false);
   const {id} = useParams();
   const navigate = useNavigate();
@@ -20,13 +22,15 @@ const EditProduct = () => {
     setLoading(true);
     axios.get(`http://localhost:5000/api/v1/products/${id}`)
     .then((response)=>{
-      console.log(response);
-      setPid(response.data.data.product.product_id);
-      setDescription(response.data.data.product.description);
-      setPrice(parseFloat(response.data.data.product.price));
-      setInstock(response.data.data.product.instock);
-      setCompanyname(response.data.data.product.companyname);
-      setSid(response.data.data.product.seller_id);
+      const {product_id, description, price, instock, companyname, seller_id} = response.data.data.product;
+      setProduct({
+        product_id,
+        description,
+        price: parseFloat(price),
+        instock,
+        companyname,
+        seller_id
+      })
       setLoading(false);
     }).catch((error)=>{
       setLoading(false);
@@ -35,21 +39,19 @@ const EditProduct = () => {
     })
   }, [])
 
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setProduct(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : type === 'radio' ? value === 'true' : type === 'number' ? parseFloat(value) : value
+    }));
+  }
+
   const handleEditProduct = () => {
-    const data = {
-      product_id,
-      description,
-      seller_id,
-      companyname,
-      price,
-      instock
-    };
     setLoading(true);
     const token = localStorage.getItem('token');
-    console.log('data');
-    console.log(data);
     axios
-      .put('http://localhost:5000/api/v1/products', data, {
+      .put('http://localhost:5000/api/v1/products', product, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -74,9 +76,10 @@ const EditProduct = () => {
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Product Id(Read Only)</label>
             <input
+              name='product_id'
               type='text'
-              value={product_id}
-              onChange={(e)=>setPid(e.target.value)}
+              value={product.product_id}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
               readOnly
             />
@@ -84,40 +87,67 @@ const EditProduct = () => {
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>description</label>
             <input
+              name='description'
               type='text'
-              value={description}
-              onChange={(e)=>setDescription(e.target.value)}
+              value={product.description}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
             />
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Company Name</label>
             <input
+              name='companyname'
               type='text'
-              value={companyname}
-              onChange={(e)=>setCompanyname(e.target.value)}
+              value={product.companyname}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
             />
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Seller Id</label>
             <input
+              name='seller_id'
               type='number'
-              value={seller_id}
-              onChange={(e)=>setSid(e.target.value)}
+              value={product.seller_id}
+              onChange={handleInputChange}
               className='border-2 border-gray-500 px-4 py-2 w-full'
             />
           </div>
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Price</label>
             <input
+              name='price'
               type='number'
-              value={price}
-              onChange={(e)=>setPrice(parseFloat(e.target.value) || 0)}
+              value={product.price}
+              onChange={(e)=> handleInputChange({...e, value: parseFloat(e.target.value) || 0 })}
               className='border-2 border-gray-500 px-4 py-2 w-full'
               min='0'
               step='0.1'
             />
+          </div>
+          <div className='my-4'>
+            <label className='text-xl mr-4 text-gray-500'>In Stock</label>
+            <div className='flex items-center'>
+              <input
+                type='radio'
+                name='instock'
+                value='true'
+                checked={product.instock === true}
+                onChange={handleInputChange}
+                className='mr-2'
+              />
+              <label className='mr-4'>Yes</label>
+              <input
+                type='radio'
+                name='instock'
+                value='false'
+                checked={product.instock === false}
+                onChange={handleInputChange}
+                className='mr-2'
+                />
+                <label>No</label>
+            </div>
           </div>
           <button className='p-2 bg-sky-300 m-8' onClick={handleEditProduct}>Save</button>
       </div>
