@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Spinner from '../components/Spinner';
 import { Link } from 'react-router-dom';
-import { AiOutlineEdit } from 'react-icons/ai';
-import { BsInfoCircle } from 'react-icons/bs';
-import { MdOutlineAddBox, MdOutlineDelete, MdOutlineAddShoppingCart, MdRemoveShoppingCart} from 'react-icons/md';
+import { MdOutlineAddBox } from 'react-icons/md';
 import Header from '../components/Header';
+import ProductTable from '../components/HomeComponents/ProductTable';
+import Pagination from '../components/HomeComponents/Pagination';
+import SearchBar from '../components/HomeComponents/SearchBar';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -16,21 +17,11 @@ const Home = () => {
   const [error, setError] = useState('');
   const [role, setRole] = useState('');
   const [cartItems, setCartItems] = useState([]);
-  const limit = 10; // Number of products per page
-  // useEffect(() => {
-  //   // Log all items in localStorage for debugging
-  //   console.log('LocalStorage contents:');
-  //   for (let i = 0; i < localStorage.length; i++) {
-  //     const key = localStorage.key(i);
-  //     const value = localStorage.getItem(key);
-  //     console.log(`${key}: ${value}`);
-  //     }
-  //   }, [currentPage]);
+  const limit = 10; 
 
   useEffect(() => {
     const userRole = localStorage.getItem('role');
     setRole(userRole);
-    console.log(userRole);
     fetchProducts();
     fetchCartItems();
   }, [currentPage]);
@@ -89,7 +80,7 @@ const Home = () => {
       })
       .then((response) => {
         console.log('Product removed from cart:', response.data);
-        fetchCartItems(); // Refresh cart items after removing
+        fetchCartItems();
       })
       .catch((error) => {
         console.log('Error removing product from cart:', error);
@@ -149,26 +140,6 @@ const Home = () => {
   const isInCart = (productId) => {
     return cartItems.some((item) => item.product_id === productId);
   };
-
-  const getPaginationButtons = () => {
-    const buttons = [];
-    if (totalPages <= 4) {
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(i);
-      }
-    } else {
-      if (currentPage > 2) {
-        buttons.push(1, '...');
-      }
-      for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
-        buttons.push(i);
-      }
-      if (currentPage < totalPages - 1) {
-        buttons.push('...', totalPages);
-      }
-    }
-    return buttons;
-  };
   
   return (
     <>
@@ -182,110 +153,30 @@ const Home = () => {
           </Link>
           )}
         </div>
-        <div className="flex mb-4">
-          <input
-            type="text"
-            placeholder="Search by Product ID"
-            value={searchId}
-            onChange={(e) => setSearchId(e.target.value)}
-            className="border border-gray-300 rounded px-4 py-2 mr-2"
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-          >
-            Search
-          </button>
-          <button
-            onClick={handleCancelSearch}
-            className="bg-gray-500 text-white px-4 py-2 rounded"
-          >
-            Cancel
-          </button>
-        </div>
+        <SearchBar
+          searchId={searchId}
+          setSearchId={setSearchId}
+          handleSearch={handleSearch}
+          handleCancelSearch={handleCancelSearch}
+        />
         {error && <p className="text-red-500">{error}</p>}
         {loading ? (
           <Spinner />
         ) : (
           <>
-          <table className='w-full border-separate border-spacing-2'>
-            <thead>
-              <tr>
-                <th className='border border-slate-600 rounded-md'>SNo</th>
-                <th className='border border-slate-600 rounded-md max-md:hidden'>Product Id</th>
-                <th className='border border-slate-600 rounded-md'>Description</th>
-                <th className='border border-slate-600 rounded-md max-md:hidden'>In Stock</th>
-                <th className='border border-slate-600 rounded-md max-md:hidden'>Company Name</th>
-                <th className='border border-slate-600 rounded-md'>Price</th>
-                <th className='border border-slate-600 rounded-md'>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product, index) => (
-                <tr key={product.product_id} className='h-8'>
-                  <td className='border border-slate-700 rounded-md text-center'>
-                    {(currentPage - 1) * limit + index + 1}
-                  </td>
-                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
-                    {product.product_id}
-                  </td>
-                  <td className='border border-slate-700 rounded-md text-center'>
-                    {product.description}
-                  </td>
-                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
-                    {product.instock ? 'Yes' : 'No'}
-                  </td>
-                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
-                    {product.companyname}
-                  </td>
-                  <td className='border border-slate-700 rounded-md text-center'>
-                    {product.price}
-                  </td>
-                  <td className='border border-slate-700 rounded-md text-center'>
-                    <div className="flex justify-center gap-x-4">
-                      <Link to={`/products/details/${product.product_id}`}>
-                        <BsInfoCircle className='text-2x1 text-green-800' />
-                      </Link>
-                      {role !== 'customer' && (
-                      <>
-                      <Link to={`/products/edit/${product.product_id}`}>
-                        <AiOutlineEdit className='text-2x1 text-yellow-600' />
-                      </Link>
-                      <Link to={`/products/delete/${product.product_id}`}>
-                        <MdOutlineDelete className='text-2x1 text-red-600' />
-                      </Link>
-                      </>
-                      )}
-                      <button 
-                        onClick={() => handleCartToggle(product.product_id)} 
-                        className={`px-1 py-0.25 rounded ${
-                          isInCart(product.product_id) ? 'bg-red-500' : 'bg-emerald-500'
-                        } text-white`}>
-                        {isInCart(product.product_id) ? <MdRemoveShoppingCart /> : <MdOutlineAddShoppingCart />}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className='flex justify-center mt-4'>
-              {getPaginationButtons().map((page, index) =>
-                page === '...' ? (
-                  <span key={index} className='px-3 py-1 mx-1'>
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 mx-1 ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
-            </div>
+            <ProductTable
+              products={products}
+              currentPage={currentPage}
+              limit={limit}
+              role={role}
+              handleCartToggle={handleCartToggle}
+              isInCart={isInCart}
+            />
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              handlePageChange={handlePageChange}
+            />
           </>
         )}
       </div>

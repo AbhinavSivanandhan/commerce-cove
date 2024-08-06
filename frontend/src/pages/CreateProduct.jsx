@@ -51,7 +51,6 @@ const CreateProduct = () => {
       <h1 className='text-3xl my-4'>Create Product</h1>
       {loading?<Spinner />:''}
       <div className='flex flex-col border-2 border-sky-bg-400 rounded-xl w-fit p-4'>
-
           <div className='my-4'>
             <label className='text-xl mr-4 text-gray-500'>Seller-Id</label>
             <input
