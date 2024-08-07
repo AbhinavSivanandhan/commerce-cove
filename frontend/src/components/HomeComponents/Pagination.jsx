@@ -25,12 +25,12 @@ const Pagination = ({ totalPages, currentPage, handlePageChange }) => {
     <div className='flex justify-center mt-4'>
       {getPaginationButtons().map((page, index) =>
         page === '...' ? (
-          <span key={index} className='px-3 py-1 mx-1'>
+          <span key={`ellipsis-${index}`} className='px-3 py-1 mx-1'>
             ...
           </span>
         ) : (
           <button
-            key={page}
+            key={`page-${page}`}
             onClick={() => handlePageChange(page)}
             className={`px-3 py-1 mx-1 ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
           >

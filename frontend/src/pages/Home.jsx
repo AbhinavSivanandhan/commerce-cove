@@ -4,9 +4,10 @@ import Spinner from '../components/Spinner';
 import { Link } from 'react-router-dom';
 import { MdOutlineAddBox } from 'react-icons/md';
 import Header from '../components/Header';
+import SearchBar from '../components/HomeComponents/SearchBar';
+import ProductCard from '../components/HomeComponents/ProductCard';
 import ProductTable from '../components/HomeComponents/ProductTable';
 import Pagination from '../components/HomeComponents/Pagination';
-import SearchBar from '../components/HomeComponents/SearchBar';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -17,6 +18,7 @@ const Home = () => {
   const [error, setError] = useState('');
   const [role, setRole] = useState('');
   const [cartItems, setCartItems] = useState([]);
+  const [isTableView, setIsTableView] = useState(true);
   const limit = 10; 
 
   useEffect(() => {
@@ -160,9 +162,16 @@ const Home = () => {
           handleCancelSearch={handleCancelSearch}
         />
         {error && <p className="text-red-500">{error}</p>}
+        <button 
+            onClick={() => setIsTableView(!isTableView)}
+            className = "bg-slate-800 text-white px-4 py-2 rounded mt-4"
+        >
+          Toggle to {isTableView? 'Card View' : 'Table View'}
+        </button>
+
         {loading ? (
           <Spinner />
-        ) : (
+        ) : isTableView? (
           <>
             <ProductTable
               products={products}
@@ -178,6 +187,22 @@ const Home = () => {
               handlePageChange={handlePageChange}
             />
           </>
+        ) : (
+          <>
+          <ProductCard
+          products={products}
+          currentPage={currentPage}
+          limit={limit}
+          role={role}
+          handleCartToggle={handleCartToggle}
+          isInCart={isInCart}
+          />
+          <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          handlePageChange={handlePageChange}
+        />
+        </>
         )}
       </div>
     </>
