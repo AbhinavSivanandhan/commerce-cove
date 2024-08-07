@@ -85,21 +85,32 @@ const OrderHistory = () => {
   };
   const getPaginationButtons = () => {
     const buttons = [];
+
     if (totalPages <= 4) {
       for (let i = 1; i <= totalPages; i++) {
         buttons.push(i);
       }
     } else {
-      if (currentPage > 2) {
-        buttons.push(1, '...');
+      buttons.push(1); // always show the first page
+
+      if (currentPage > 3) {
+        buttons.push('...');
       }
-      for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
+
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = startPage; i <= endPage; i++) {
         buttons.push(i);
       }
-      if (currentPage < totalPages - 1) {
-        buttons.push('...', totalPages);
+
+      if (currentPage < totalPages - 2) {
+        buttons.push('...');
       }
+
+      buttons.push(totalPages); // always show the last page
     }
+
     return buttons;
   };
   
