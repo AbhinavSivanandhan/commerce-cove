@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
-import {loadStripe} from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-toastify';
+import CartItemsList from '../components/CartComponents/CartItemsList';
+import CartSummary from '../components/CartComponents/CartSummary';
+import CheckoutModal from '../components/CartComponents/CheckoutModal';
 const Cart = () => {
   const stripePromise = loadStripe('pk_test_51PWMd8Ron26oqThkOjUtJ4jPGKy9qPogXwxOyBQ3ENGV7QJO5uFzXm7m62KypNy2VkyOSYohOQRcs0spHsjsisq3003vNjNB7O');
   const [cartItems, setCartItems] = useState([]);
@@ -162,7 +165,6 @@ const Cart = () => {
       console.log('Order IDs:', orderIds);
       
       setShowModal(false);
-  
       if (!codChecked) {
         const paymentSuccessful = await makePayment(orderIds);
         if (paymentSuccessful) {
@@ -188,89 +190,9 @@ const Cart = () => {
     <div className="p-4">
       <BackButton />
       <h1 className="text-3xl mb-4">Cart</h1>
-      <ul className="space-y-4">
-        {cartItems.map(item => (
-          <li key={item.product_id} className="p-4 border rounded shadow-sm flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-semibold">{item.description}</h2>
-              <p className="text-gray-600">${item.price} x {item.quantity}</p>
-              {item.instock ? (
-                <select value={item.quantity} onChange={(e) => handleQuantityChange(item.product_id, e.target.value)} className="border border-gray-300 rounded p-1">
-                    {[...Array(10).keys()].map(i => (
-                    <option key={i + 1} value={i + 1}>{i + 1}</option>
-                  ))}
-                </select>
-              ) : (
-                <p className="text-red-600">(Out of Stock)</p>
-              )}
-            </div>
-            <div>
-              <p className="text-lg font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
-              <button onClick={() => handleDelete(item.product_id)} className="ml-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
-            </div>
-          </li>
-))}
-      </ul>
-      <div className="mt-6">
-        <h2 className="text-2xl font-semibold">Total: ${total.toFixed(2)}</h2>
-        <div className="flex items-center mt-4">
-        <input type="checkbox" id="codCheckbox" checked={codChecked} onChange={handleCODToggle} className="mr-2" />
-        <label htmlFor="codCheckbox">Cash on Delivery</label>
-        </div>
-        <button onClick={handleCheckoutClick} disabled={!codChecked} className={`mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ${!codChecked && 'opacity-50 cursor-not-allowed'}`}>
-        Checkout ${total.toFixed(2)}
-        </button>
-        <button onClick={handleCheckoutClick} disabled={codChecked} className={`mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ${codChecked && 'opacity-50 cursor-not-allowed'}`}>
-          Pay ${total.toFixed(2)}
-        </button>
-      </div>
-      {showModal && (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-        <div className="bg-white p-6 rounded shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Checkout</h2>
-          <form onSubmit={handleCheckoutSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700">Address</label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="border border-gray-300 rounded px-4 py-2 w-full"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700">Contact Details</label>
-              <input
-                type="text"
-                value={contactDetails}
-                onChange={(e) => setContactDetails(e.target.value)}
-                className="border border-gray-300 rounded px-4 py-2 w-full"
-                required
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-      )}
+      <CartItemsList cartItems={cartItems} onQuantityChange={handleQuantityChange} onDelete={handleDelete} />
+      <CartSummary total={total} codChecked={codChecked} onCODToggle={handleCODToggle} onCheckoutClick={handleCheckoutClick} />
+      <CheckoutModal showModal={showModal} address={address} setAddress={setAddress} contactDetails={contactDetails} setContactDetails={setContactDetails} onSubmit={handleCheckoutSubmit} onCancel={() => setShowModal(false)} />
     </div>
   );
 };
