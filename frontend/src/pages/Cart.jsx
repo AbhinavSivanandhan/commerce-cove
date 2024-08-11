@@ -146,6 +146,17 @@ const Cart = () => {
     const token = localStorage.getItem('token');
     let orderIds = [];
     const inStockItems = cartItems.filter(item => item.instock);
+    if (!address) {
+      setError('Address is required.');
+      toast.error('Address is required.');
+      return;
+    }
+    
+    if (!contactDetails) {
+      setError('Contact details are required.');
+      toast.error('Contact details are required.');
+      return;
+    }
     if (!address || !contactDetails || inStockItems.length === 0) {
       setError('All fields are required and at least one in-stock item must be in cart.');
       toast.error('All fields are required and at least one in-stock item must be in cart.');
