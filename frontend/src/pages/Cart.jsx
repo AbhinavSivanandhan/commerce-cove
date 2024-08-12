@@ -14,7 +14,7 @@ const Cart = () => {
   const [total, setTotal] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [address, setAddress] = useState('');
-  const [contactDetails, setContactDetails] = useState('');
+  const [contact_details, setContactDetails] = useState('');
   const [error, setError] = useState('');
   const [codChecked, setCodChecked] = useState(false);
   const navigate = useNavigate();
@@ -152,19 +152,20 @@ const Cart = () => {
       return;
     }
     
-    if (!contactDetails) {
+    if (!contact_details) {
       setError('Contact details are required.');
       toast.error('Contact details are required.');
       return;
     }
-    if (!address || !contactDetails || inStockItems.length === 0) {
+
+    if (!address || !contact_details || inStockItems.length === 0) {
       setError('All fields are required and at least one in-stock item must be in cart.');
       toast.error('All fields are required and at least one in-stock item must be in cart.');
       return;
     }
   
     try {
-      const response = await axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details: contactDetails, inStockItems }, {
+      const response = await axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details, inStockItems }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -203,7 +204,7 @@ const Cart = () => {
       <h1 className="text-3xl mb-4">Cart</h1>
       <CartItemsList cartItems={cartItems} onQuantityChange={handleQuantityChange} onDelete={handleDelete} />
       <CartSummary total={total} codChecked={codChecked} onCODToggle={handleCODToggle} onCheckoutClick={handleCheckoutClick} />
-      <CheckoutModal showModal={showModal} address={address} setAddress={setAddress} contactDetails={contactDetails} setContactDetails={setContactDetails} onSubmit={handleCheckoutSubmit} onCancel={() => setShowModal(false)} />
+      <CheckoutModal showModal={showModal} address={address} setAddress={setAddress} contact_details={contact_details} setContactDetails={setContactDetails} onSubmit={handleCheckoutSubmit} onCancel={() => setShowModal(false)} />
     </div>
   );
 };
