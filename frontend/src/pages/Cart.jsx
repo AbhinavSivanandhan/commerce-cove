@@ -15,6 +15,7 @@ const Cart = () => {
   const [showModal, setShowModal] = useState(false);
   const [address, setAddress] = useState('');
   const [contact_details, setContactDetails] = useState('');
+  const [confirm_check, setConfirmCheck] = useState(false);
   const [error, setError] = useState('');
   const [codChecked, setCodChecked] = useState(false);
   const navigate = useNavigate();
@@ -163,6 +164,12 @@ const Cart = () => {
       toast.error('All fields are required and at least one in-stock item must be in cart.');
       return;
     }
+
+    if (!confirm_check) {
+      setError('Confirm your details!');
+      toast.error('Confirm your details!');
+      return;
+    }
   
     try {
       const response = await axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details, inStockItems }, {
@@ -204,7 +211,7 @@ const Cart = () => {
       <h1 className="text-3xl mb-4">Cart</h1>
       <CartItemsList cartItems={cartItems} onQuantityChange={handleQuantityChange} onDelete={handleDelete} />
       <CartSummary total={total} codChecked={codChecked} onCODToggle={handleCODToggle} onCheckoutClick={handleCheckoutClick} />
-      <CheckoutModal showModal={showModal} address={address} setAddress={setAddress} contact_details={contact_details} setContactDetails={setContactDetails} onSubmit={handleCheckoutSubmit} onCancel={() => setShowModal(false)} />
+      <CheckoutModal showModal={showModal} address={address} setAddress={setAddress} contact_details={contact_details} setContactDetails={setContactDetails} confirm_check={confirm_check} setConfirmCheck={setConfirmCheck} onSubmit={handleCheckoutSubmit} onCancel={() => setShowModal(false)} />
     </div>
   );
 };

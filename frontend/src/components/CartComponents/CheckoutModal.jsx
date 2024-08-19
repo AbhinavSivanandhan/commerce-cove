@@ -1,7 +1,7 @@
 import React from 'react';
 import { APILoader, PlacePicker } from '@googlemaps/extended-component-library/react';
 
-const CheckoutModal = ({ showModal, address, setAddress, contact_details, setContactDetails, onSubmit, onCancel }) => {
+const CheckoutModal = ({ showModal, address, setAddress, contact_details, setContactDetails, confirm_check, setConfirmCheck, onSubmit, onCancel }) => {
   if (!showModal) return null;
 
   const [formattedAddress, setFormattedAddress] = React.useState('');
@@ -47,6 +47,17 @@ const CheckoutModal = ({ showModal, address, setAddress, contact_details, setCon
               type="text"
               value={contact_details}
               onChange={(e) => setContactDetails(e.target.value)}
+              className="border border-gray-300 rounded px-4 py-2 w-full"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700">Confirm that your details are correct:</label>
+            <input
+              type="checkbox"
+              value={confirm_check}
+              onChange={(e) => setConfirmCheck(!confirm_check)}
               className="border border-gray-300 rounded px-4 py-2 w-full"
               required
             />
