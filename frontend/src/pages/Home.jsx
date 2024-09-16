@@ -18,7 +18,7 @@ const Home = () => {
   const [error, setError] = useState('');
   const [role, setRole] = useState('');
   const [cartItems, setCartItems] = useState([]);
-  const [isTableView, setIsTableView] = useState(true);
+  const [isTableView, setIsTableView] = useState(false);
   const limit = 10; 
 
   useEffect(() => {
