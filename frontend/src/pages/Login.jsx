@@ -14,7 +14,7 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/v1/accounts/login', { username, password });
+      const response = await axios.post('http://localhost:5001/api/v1/accounts/login', { username, password });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', response.data.role); // Store the user's role in localStorage
       setLoading(false);

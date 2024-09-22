@@ -18,7 +18,7 @@ const Header = () => {
 
     if (token) {
       // console.log('Sending request to /api/v1/accounts/status'); // Debugging line
-      axios.get('http://localhost:5000/api/v1/accounts/status', { headers: { Authorization: `Bearer ${token}` } })
+      axios.get('http://localhost:5001/api/v1/accounts/status', { headers: { Authorization: `Bearer ${token}` } })
         .then(response => {
           // console.log('Response from /api/v1/accounts/status:', response); // Debugging line
           // console.log(response);

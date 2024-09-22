@@ -20,7 +20,7 @@ const OrderHistory = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         axios
-          .get(`http://localhost:5000/api/v1/orders/myOrders?page=${currentPage}&limit=${limit}`, {
+          .get(`http://localhost:5001/api/v1/orders/myOrders?page=${currentPage}&limit=${limit}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -54,7 +54,7 @@ const OrderHistory = () => {
     }
     setLoading(true);
     axios
-      .get(`http://localhost:5000/api/v1/orders/${searchId}`, {
+      .get(`http://localhost:5001/api/v1/orders/${searchId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

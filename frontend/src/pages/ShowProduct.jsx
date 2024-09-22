@@ -13,10 +13,10 @@ const ShowProduct = () => {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`http://localhost:5000/api/v1/products/${id}`)
+      .get(`http://localhost:5001/api/v1/products/${id}`)
       .then((response) => {
         console.log(response);
-        setProduct(response.data.data.product);
+        setProduct(response.data);  // Now the product includes images as well
         setLoading(false);
       })
       .catch((error) => {
@@ -24,6 +24,21 @@ const ShowProduct = () => {
         setLoading(false);
       });
   }, [id]);
+
+  // Carousel logic: simple manual navigation with state
+  const [currentImage, setCurrentImage] = useState(0);
+
+  const handlePrevImage = () => {
+    setCurrentImage((prev) =>
+      prev === 0 ? product.images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImage((prev) =>
+      prev === product.images.length - 1 ? 0 : prev + 1
+    );
+  };
 
   return (
     <>
@@ -73,6 +88,37 @@ const ShowProduct = () => {
                     <td className="py-3 px-4 font-semibold text-gray-600 border-b border-gray-300">Company Name</td>
                     <td className="py-3 px-4 border-b border-gray-300">{product.companyname}</td>
                   </tr>
+                  {/* Carousel for images */}
+                  {product.images && product.images.length > 0 && (
+                    <tr className="hover:bg-gray-100 transition-all">
+                      <td className="py-3 px-4 font-semibold text-gray-600 border-b border-gray-300">Product Images</td>
+                      <td className="py-3 px-4 border-b border-gray-300">
+                        <div className="relative w-full">
+                          <div className="flex justify-center">
+                            {/* Full image without cropping */}
+                            <img
+                              src={product.images[currentImage].image_url}
+                              alt={`Product image ${currentImage + 1}`}
+                              className="max-w-full max-h-80 object-contain rounded-md shadow-md"
+                            />
+                          </div>
+                          {/* Navigation Buttons */}
+                          <button
+                            className="absolute top-1/2 left-0 p-2 transform -translate-y-1/2 bg-gray-500 text-white rounded-full"
+                            onClick={handlePrevImage}
+                          >
+                            &#8249;
+                          </button>
+                          <button
+                            className="absolute top-1/2 right-0 p-2 transform -translate-y-1/2 bg-gray-500 text-white rounded-full"
+                            onClick={handleNextImage}
+                          >
+                            &#8250;
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

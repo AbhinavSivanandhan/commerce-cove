@@ -7,7 +7,7 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/v1/products')
+    axios.get('http://localhost:5001/api/v1/products')
       .then(response => {
         setProducts(response.data.data.products);
       })
@@ -18,7 +18,7 @@ const ProductList = () => {
 
   const addToCart = (product_id) => {
     const token = localStorage.getItem('token');
-    axios.post('http://localhost:5000/api/v1/cart/add', { product_id, quantity: 1 }, {
+    axios.post('http://localhost:5001/api/v1/cart/add', { product_id, quantity: 1 }, {
       headers: {
         Authorization: `Bearer ${token}`
       }

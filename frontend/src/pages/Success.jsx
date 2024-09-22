@@ -26,7 +26,7 @@ const Success = () => {
         status: 'paid'
       };
       try {
-        await axios.put('http://localhost:5000/api/v1/orders/updateStatus', data, {
+        await axios.put('http://localhost:5001/api/v1/orders/updateStatus', data, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
@@ -47,7 +47,7 @@ const Success = () => {
     }
     const timeoutId = setTimeout(() => {
       navigate('/');
-    }, 5000);
+    }, 5001);
     // Cleanup timeout if component unmounts
     return () => clearTimeout(timeoutId);
   }, [navigate]);

@@ -22,7 +22,7 @@ const Cart = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:5000/api/v1/carts/view', {
+    axios.get('http://localhost:5001/api/v1/carts/view', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -61,7 +61,7 @@ const Cart = () => {
 
   const handleDelete = (product_id) => {
     const token = localStorage.getItem('token');
-    axios.delete(`http://localhost:5000/api/v1/carts/delete/${product_id}`, {
+    axios.delete(`http://localhost:5001/api/v1/carts/delete/${product_id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -96,7 +96,7 @@ const Cart = () => {
       "Content-Type": "application/json"
     }
     try {
-    const response = await fetch(`http://localhost:5000/create-checkout-session`,{
+    const response = await fetch(`http://localhost:5001/create-checkout-session`,{
       method: "POST",
       headers: headers,
       body: JSON.stringify(body)
@@ -126,7 +126,7 @@ const Cart = () => {
     }
     console.log('data payload of update:',JSON.stringify(data, null, 2));
     axios
-    .put('http://localhost:5000/api/v1/orders/updateStatus', data, {
+    .put('http://localhost:5001/api/v1/orders/updateStatus', data, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -172,7 +172,7 @@ const Cart = () => {
     }
   
     try {
-      const response = await axios.post(`http://localhost:5000/api/v1/orders/checkout`, { address, contact_details, inStockItems }, {
+      const response = await axios.post(`http://localhost:5001/api/v1/orders/checkout`, { address, contact_details, inStockItems }, {
         headers: {
           Authorization: `Bearer ${token}`
         }

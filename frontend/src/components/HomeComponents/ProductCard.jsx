@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { BsInfoCircle } from 'react-icons/bs';
 import { MdOutlineAddShoppingCart, MdRemoveShoppingCart, MdOutlineDelete } from 'react-icons/md';
+import ProductImageCarousel from './ProductImageCarousel';
 
 const ProductCard = ({ products, role, handleCartToggle, isInCart }) => {
   return (
@@ -13,6 +14,15 @@ const ProductCard = ({ products, role, handleCartToggle, isInCart }) => {
           className="border p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow bg-white flex flex-col justify-between h-[400px]" // Adjust height
         >
           <div>
+            {/* Display Carousel or Thumbnail */}
+            {product.images && product.images.length > 0 ? (
+              <ProductImageCarousel images={product.images} />
+            ) : (
+              <div className="h-32 bg-gray-200 flex items-center justify-center">
+                <p className="text-gray-600 text-sm">No Image Available</p>
+              </div>
+            )}
+
             <h2 className="text-xl font-bold mb-2">{product.description}</h2> {/* Reduced margin */}
             <p className="mb-1 text-sm text-gray-600">Product ID: {product.product_id}</p> {/* Reduced margin */}
             <p className="mb-1 text-sm text-gray-600">Price: ${product.price}</p>
@@ -35,18 +45,20 @@ const ProductCard = ({ products, role, handleCartToggle, isInCart }) => {
                 </Link>
               </>
             )}
-            <button
-              onClick={() => handleCartToggle(product.product_id)}
-              className={`flex items-center px-2 py-1 rounded text-white hover:opacity-90 transition-opacity ${
-                isInCart(product.product_id) ? 'bg-red-500' : 'bg-emerald-500'
-              }`}
-            >
-              {isInCart(product.product_id) ? (
-                <MdRemoveShoppingCart className="text-2xl" />
-              ) : (
-                <MdOutlineAddShoppingCart className="text-2xl" />
-              )}
-            </button>
+            {role !== 'admin' && (
+              <button
+                onClick={() => handleCartToggle(product.product_id)}
+                className={`flex items-center px-2 py-1 rounded text-white hover:opacity-90 transition-opacity ${
+                  isInCart(product.product_id) ? 'bg-red-500' : 'bg-emerald-500'
+                }`}
+              >
+                {isInCart(product.product_id) ? (
+                  <MdRemoveShoppingCart className="text-2xl" />
+                ) : (
+                  <MdOutlineAddShoppingCart className="text-2xl" />
+                )}
+              </button>
+            )}
           </div>
         </div>
       ))}
