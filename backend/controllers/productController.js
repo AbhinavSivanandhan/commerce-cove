@@ -101,24 +101,47 @@ export const getProductByIdController = async (req, res) => {
 // Update product
 export const updateProductController = async (req, res) => {
   try {
-    const productId = req.params.id;
-    const { description, price, instock, seller_id, companyname, images } = req.body;
-    const updatedProduct = await updateProduct(productId, { description, price, instock, seller_id, companyname });
+    console.log('Received request to update product'); // Log request received
 
+    const productId = req.params.id; // Extract product ID from request params
+    const { description, price, instock, seller_id, companyname, images } = req.body; // Destructure product details from request body
+
+    // Log the extracted details
+    console.log(`Product ID: ${productId}`);
+    console.log(`Received data:`, { description, price, instock, seller_id, companyname, images });
+
+    // Update the product with the new details
+    const updatedProduct = await updateProduct(productId, description, price, instock, seller_id, companyname);
+
+    // Log the result of the update query
+    console.log('Updated product details:', updatedProduct);
+
+    // Handle images if provided
     if (images) {
-      // First, delete the old images
+      console.log('Images provided. Proceeding to delete old images and add new images.');
+
+      // First delete old images
       await deleteProductImages(productId);
-      // Then, add new images
+      console.log('Old images deleted.');
+
+      // Add new images
       for (const imageUrl of images) {
+        console.log(`Adding image: ${imageUrl}`);
         await addProductImage(productId, imageUrl);
       }
+      console.log('All new images added.');
+    } else {
+      console.log('No images provided, skipping image update.');
     }
 
+    // Respond with the updated product details
     res.json(updatedProduct);
   } catch (error) {
+    console.error('Error updating product:', error); // Log the error
     res.status(500).json({ error: 'Error updating product' });
   }
 };
+
 
 // Delete product and its images
 export const deleteProductController = async (req, res) => {

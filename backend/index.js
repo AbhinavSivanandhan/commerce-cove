@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+//import { userRateLimiter, globalRateLimiter } from './middleware/rateLimitMiddleware.js'; // Import both middlewares
 import db from './db/index.js';
 import accountRoutes from './routes/accountRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -25,7 +26,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json()); // this will allow to read req.body
-
+//using route based ratelimiting instead. factory function
+//app.use(globalRateLimiter); // Apply global rate limiter before all other routes (applies to the whole app)
+//app.use(userRateLimiter); // Apply user/IP-based rate limiter to all routes or specific routes
 // Routes
 app.use('/api/v1/accounts', accountRoutes);
 app.use('/api/v1/products', productRoutes);

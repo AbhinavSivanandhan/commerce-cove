@@ -15,12 +15,25 @@ export const createProduct = async (productData) => {
 
 
 export const updateProduct = async (product_id, description, price, instock, seller_id, companyname) => {
-  const result = await db.query(
-    'UPDATE product SET description = $1, price = $2, instock = $3, seller_id = $4, companyname = $5 WHERE product_id = $6 RETURNING *',
-    [description, price, instock, seller_id, companyname, product_id]
-  );
-  return result.rows[0];
+  try {
+    console.log('Starting product update in DB...');
+    console.log('Product ID:', product_id);
+    console.log('New product data:', { description, price, instock, seller_id, companyname });
+
+    const result = await db.query(
+      'UPDATE product SET description = $1, price = $2, instock = $3, seller_id = $4, companyname = $5 WHERE product_id = $6 RETURNING *',
+      [description, price, instock, seller_id, companyname, product_id]
+    );
+
+    console.log('Database update result:', result.rows[0]); // Log result from DB
+
+    return result.rows[0]; // Return the updated product
+  } catch (error) {
+    console.error('Error updating product in DB:', error); // Log DB error
+    throw error; // Rethrow error to be caught in the controller
+  }
 };
+
 
 export const deleteProduct = async (product_id) => {
   const result = await db.query('DELETE FROM product WHERE product_id = $1 RETURNING *', [product_id]);

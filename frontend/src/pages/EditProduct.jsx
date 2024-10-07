@@ -93,7 +93,7 @@ const EditProduct = () => {
 
     try {
       // Step 1: Update product details
-      await axios.put(`http://localhost:5001/api/v1/products`, product, {
+      await axios.put(`http://localhost:5001/api/v1/products/${id}`, product, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
