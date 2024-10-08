@@ -14,7 +14,7 @@ const Header = () => {
     // console.log('useEffect triggered'); // Debugging line
     // Check if the user is logged in
     const token = localStorage.getItem('token');
-    console.log('Token from localStorage:', token); // Debugging line
+    //console.log('Token from localStorage:', token); // Debugging line
 
     if (token) {
       // console.log('Sending request to /api/v1/accounts/status'); // Debugging line
@@ -25,7 +25,7 @@ const Header = () => {
           if (response.data.user) {
             setIsLoggedIn(true);
             setUsername(response.data.user.username);
-            console.log('User is logged in:', response.data.user.username); // Debugging line
+            //console.log('User is logged in:', response.data.user.username); // Debugging line
           } else {
             setIsLoggedIn(false);
             setUsername('');

@@ -26,7 +26,7 @@ const EditProduct = () => {
       .get(`http://localhost:5001/api/v1/products/${id}`)
       .then((response) => {
         // Log the API response to see its structure
-        console.log('API Response:', response.data);
+        //console.log('API Response:', response.data);
 
         // Destructure data directly from response.data
         const { product_id, description, price, instock, companyname, seller_id, images } = response.data; // Adjust based on actual structure
