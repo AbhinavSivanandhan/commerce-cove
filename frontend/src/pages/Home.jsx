@@ -19,7 +19,7 @@ const Home = () => {
   const [role, setRole] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [isTableView, setIsTableView] = useState(false);
-  const limit = 10; 
+  const limit = 12; //i like the 4 * 3 aesthetic
 
   useEffect(() => {
     const userRole = localStorage.getItem('role');

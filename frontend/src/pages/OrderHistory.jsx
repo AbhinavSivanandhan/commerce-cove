@@ -118,7 +118,6 @@ const OrderHistory = () => {
     <>
     <Header />
     <div className='p-4'>
-      <BackButton />
       <div className="flex justify-between items-center">
         <h1 className="text-3xl my-8">Orders List</h1>
 

@@ -54,34 +54,40 @@ const Header = () => {
   };
 
   return (
-    <header className="flex justify-between items-center p-4 bg-gray-100 border-b border-gray-300">
+    <header className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 shadow-lg">
+      {/* Dark matte header with a subtle gradient */}
       <div className="text-2xl font-bold">
-        <Link to="/" className="text-gray-900">CommerceCove</Link> {/* Replace with your logo and homepage link */}
+        <Link 
+          to="/" 
+          className="text-gray-100 transition-transform duration-300 transform hover:scale-105 hover:text-fuchsia-300 hover:shadow-lg active:scale-95 outline-none hover:outline hover:outline-2 hover:outline-gray-400 px-4 py-2 rounded-full"
+        >
+          CommerceCove
+        </Link>
       </div>
       <div className="flex items-center">
         {isLoggedIn ? (
           <>
             <Link to='/cart'>
-              <button className='bg-stone-950 text-white px-4 py-2 rounded flex items-center'>
+              <button className='bg-gray-700 text-white px-4 py-2 rounded-full flex items-center hover:bg-gray-600 transition-all duration-300 shadow-md'>
                 <FaShoppingCart className="mr-2" />Cart
               </button>
             </Link>
-            <Link to='/orderhistory'>
-              <button className='bg-stone-950 text-white px-4 py-2 rounded flex items-center'>
+            <Link to='/orderhistory' className="ml-4">
+              <button className='bg-gray-700 text-white px-4 py-2 rounded-full flex items-center hover:bg-gray-600 transition-all duration-300 shadow-md'>
                 <IoReceiptSharp className="mr-2" />Orders
               </button>
             </Link>
-            <span className="ml-4 text-gray-700">{username}</span>
-            <button onClick={handleLogout} className="ml-4 px-4 py-2 bg-blue-950 text-white rounded hover:bg-blue-700">
+            <span className="ml-4 text-gray-300 font-semibold">{username}</span>
+            <button onClick={handleLogout} className="ml-4 px-4 py-2 bg-indigo-700 text-white rounded-full hover:bg-indigo-600 transition-all duration-300 shadow-md">
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+            <Link to="/login" className="ml-4 px-4 py-2 bg-indigo-700 text-white rounded-full hover:bg-indigo-600 transition-all duration-300 shadow-md">
               Login
             </Link>
-            <Link to="/register" className="ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700">
+            <Link to="/register" className="ml-4 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-500 transition-all duration-300 shadow-md">
               Register
             </Link>
           </>

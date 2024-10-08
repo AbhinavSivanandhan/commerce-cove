@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 import BackButton from '../components/BackButton';
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-toastify';
@@ -206,6 +207,8 @@ const Cart = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
+    <>
+    <Header />
     <div className="p-4">
       <BackButton />
       <h1 className="text-3xl mb-4">Cart</h1>
@@ -213,6 +216,7 @@ const Cart = () => {
       <CartSummary total={total} codChecked={codChecked} onCODToggle={handleCODToggle} onCheckoutClick={handleCheckoutClick} />
       <CheckoutModal showModal={showModal} address={address} setAddress={setAddress} contact_details={contact_details} setContactDetails={setContactDetails} confirm_check={confirm_check} setConfirmCheck={setConfirmCheck} onSubmit={handleCheckoutSubmit} onCancel={() => setShowModal(false)} />
     </div>
+    </>
   );
 };
 
