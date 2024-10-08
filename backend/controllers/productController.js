@@ -144,8 +144,7 @@ export const deleteProductController = async (req, res) => {
     await deleteProductImages(productId);
 
     // Step 4: Delete the product itself
-    await deleteProductById(productId);
-
+    await deleteProduct(productId);
     res.status(200).json({ message: 'Product and associated images deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);

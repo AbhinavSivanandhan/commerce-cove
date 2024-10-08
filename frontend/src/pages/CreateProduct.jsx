@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import BackButton from '../components/BackButton'
 import Spinner from '../components/Spinner'
 import { toast } from 'react-toastify';
-
+import Header from '../components/Header'
 const CreateProduct = () => {
   const [product, setProduct] = useState({
     description: '',
@@ -143,6 +143,8 @@ const CreateProduct = () => {
   };
   
   return (
+    <>
+    <Header />
     <div className='p-4'>
       <BackButton/>
       <h1 className='text-3xl my-4'>Create Product</h1>
@@ -227,6 +229,7 @@ const CreateProduct = () => {
           <button className='p-2 bg-sky-300 m-8' onClick={handleSaveProduct}>Save</button>
       </div>
     </div>
+    </>
   )
 }
 

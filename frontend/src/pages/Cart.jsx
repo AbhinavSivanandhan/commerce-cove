@@ -210,7 +210,7 @@ const Cart = () => {
     <>
     <Header />
     <div className="p-4">
-      <BackButton />
+      {/* <BackButton text="Return home" /> */}
       <h1 className="text-3xl mb-4">Cart</h1>
       <CartItemsList cartItems={cartItems} onQuantityChange={handleQuantityChange} onDelete={handleDelete} />
       <CartSummary total={total} codChecked={codChecked} onCODToggle={handleCODToggle} onCheckoutClick={handleCheckoutClick} />

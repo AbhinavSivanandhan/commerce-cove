@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import Header from '../components/Header';
 import BackButton from '../components/BackButton';
 import Spinner from '../components/Spinner';
 import { toast } from 'react-toastify';
@@ -134,6 +135,8 @@ const EditProduct = () => {
   };
 
   return (
+    <>
+    <Header />
     <div className='p-4'>
       <BackButton />
       <h1 className='text-3xl my-4'>Edit Product</h1>
@@ -255,6 +258,7 @@ const EditProduct = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 
