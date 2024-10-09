@@ -13,7 +13,7 @@ router.delete('/:id', authMiddleware(['admin']), rateLimitMiddleware(50, 3600, 1
 router.get('/:id', rateLimitMiddleware(500, 3600, 1000), getProductByIdController);
 router.get('/', rateLimitMiddleware(1000, 3600, 1000), getAllProductsController);
 router.post('/:id/images', authMiddleware(['admin']), rateLimitMiddleware(50, 3600, 1000), addImagesToProduct);
-router.delete('/:id/images', authMiddleware(['admin']), rateLimitMiddleware(500, 3600, 1000), deleteProductImage);
+router.delete('/:id/images', authMiddleware(['admin']), rateLimitMiddleware(50, 3600, 1000), deleteProductImage);
 router.post('/s3-presigned-url', rateLimitMiddleware(80, 3600, 1000), generatePresignedUrl);
 
 export default router;
