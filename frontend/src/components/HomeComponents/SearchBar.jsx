@@ -1,13 +1,13 @@
 import React from 'react';
 
-const SearchBar = ({ searchId, setSearchId, handleSearch, handleCancelSearch }) => {
+const SearchBar = ({ searchTerm, setSearchTerm, handleSearch, handleCancelSearch }) => {
   return (
     <div className="flex mb-4">
       <input
         type="text"
-        placeholder="Search by Product ID"
-        value={searchId}
-        onChange={(e) => setSearchId(e.target.value)}
+        placeholder="Enter Product Name/ID"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
         className="border border-gray-300 rounded px-4 py-2 mr-2"
       />
       <button

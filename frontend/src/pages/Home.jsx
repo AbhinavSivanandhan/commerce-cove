@@ -14,12 +14,13 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchId, setSearchId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
   const [role, setRole] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [isTableView, setIsTableView] = useState(false);
   const limit = 12; //i like the 4 * 3 aesthetic
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const userRole = localStorage.getItem('role');
@@ -34,6 +35,7 @@ const Home = () => {
 
   const fetchProducts = () => {
     setLoading(true);
+    if (!isSearching){
     axios
       .get(`http://localhost:5001/api/v1/products?page=${currentPage}&limit=${limit}`)
       .then((response) => {
@@ -45,7 +47,32 @@ const Home = () => {
         console.log(error);
         setLoading(false);
       });
+    } else {
+      axios
+      .get(`http://localhost:5001/api/v1/products/search/${searchTerm}?page=${currentPage}&limit=${limit}`)
+      .then((response) => { 
+          // Handle search by term (paginated response)
+          setLoading(false);
+          const { products, totalPages, currentPage: responsePage } = response.data.data;
+          if (products && products.length > 0) {
+            setProducts(products);
+            setTotalPages(totalPages);
+            setCurrentPage(responsePage); // Update the current page to match the response
+            setError('');
+          } else {
+            setProducts([]);
+            setError('No other records found with that term. Click on cancel to view the full list again.');
+          }
+        })
+        .catch((error) => {
+          console.error('Error during search:', error);
+          setLoading(false);
+          setProducts([]);
+          setError('No records found with that term. Click on cancel to view the full list again.');
+        });
+      }
   };
+
 
   const fetchCartItems = () => {
     const token = localStorage.getItem('token');
@@ -101,43 +128,77 @@ const Home = () => {
     }
   };
 
+  // Update handlePageChange to trigger the correct function
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
+  // Call fetchProducts and handleSearch in useEffect based on currentPage changes
+  useEffect(() => {
+      fetchProducts(); // Fetch regular products if no search is active
+  }, [currentPage, isSearching]);//dependency array need not have issearching, fetchproducts handles it
+
+
   const handleSearch = () => {
-    if (searchId.trim() === '') {
-      fetchProducts();
+    if (searchTerm.trim() === '') {
+      setError('Enter a value');
       return;
-    } else if (isNaN(searchId)) {
-      setError('Valid Product ID should be numeric');
+    } else if (/^[a-zA-Z0-9]*$/.test(searchTerm) === false) {
+      setError('Search term should be alphanumeric');
       return;
     }
     setLoading(true);
+    setIsSearching(true);
+    setCurrentPage(1);
+    const searchUrl = isNaN(searchTerm)
+      ? `http://localhost:5001/api/v1/products/search/${searchTerm}?page=${currentPage}&limit=${limit}`
+      : `http://localhost:5001/api/v1/products/${searchTerm}`;
+  
     axios
-      .get(`http://localhost:5001/api/v1/products/${searchId}`)
-      .then((response) => {
-        if (response.data.data.product) {
-          setProducts([response.data.data.product]);
-          setTotalPages(1);
-          setError('');
+      .get(searchUrl)
+      .then((response) => {  
+        if (isNaN(searchTerm)) {
+          // Handle search by term (paginated response)
+          const { products, totalPages, currentPage: responsePage } = response.data.data;
+  
+          if (products && products.length > 0) {
+            setProducts(products);
+            setTotalPages(totalPages);
+            setCurrentPage(responsePage); // Update the current page to match the response
+            setError('');
+          } else {
+            setProducts([]);
+            setError('No records found with that term. Click on cancel to view the full list again.');
+          }
         } else {
-          setProducts([]);
-          setError('No records found with that ID. Click on cancel to view the full list again.');
+          // Handle search by ID
+          const product = response.data;
+  
+          if (product && product.product_id) {
+            setProducts([product]);
+            setTotalPages(1);
+            setError('');
+          } else {
+            setProducts([]);
+            setError('No records found with that ID. Click on cancel to view the full list again.');
+          }
         }
         setLoading(false);
       })
       .catch((error) => {
+        console.error('Error during search:', error);
         setLoading(false);
         setProducts([]);
-        setError('No records found with that ID. Click on cancel to view the full list again.');
+        setError('No records found with that term. Click on cancel to view the full list again.');
       });
   };
+  
 
   const handleCancelSearch = () => {
-    setSearchId('');
+    setSearchTerm('');
     setCurrentPage(1);
-    fetchProducts();
+    setIsSearching(false); // Reset search state
+    //fetchProducts();
     setError('');
   };
 
@@ -158,8 +219,8 @@ const Home = () => {
           )}
         </div>
         <SearchBar
-          searchId={searchId}
-          setSearchId={setSearchId}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
           handleSearch={handleSearch}
           handleCancelSearch={handleCancelSearch}
         />

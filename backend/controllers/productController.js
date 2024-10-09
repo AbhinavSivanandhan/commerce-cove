@@ -1,4 +1,4 @@
-import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } from '../models/productModel.js';
+import { createProduct, getAllProducts, getProductById, getProductBySearchTerm, updateProduct, deleteProduct } from '../models/productModel.js';
 import { addProductImage, getProductImages, deleteProductImages, deleteProductImageByUrl } from '../models/productImageModel.js';
 import AWS from 'aws-sdk';
 
@@ -90,11 +90,65 @@ export const getProductByIdController = async (req, res) => {
   try {
     const productId = req.params.id;
     const product = await getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    // Only fetch images if the product exists
     const images = await getProductImages(productId);
 
     res.json({ ...product, images });
   } catch (error) {
     res.status(500).json({ error: 'Error fetching product' });
+  }
+};
+
+// Get a single product by search term
+export const getProductBySearchTermController = async (req, res) => {
+  try {
+    const searchTerm = req.params.searchTerm;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Fetch the products matching the search term with pagination
+    const { rows: products, rowCount } = await getProductBySearchTerm(searchTerm, limit, offset);
+
+    // Check if products exist
+    if (!products || products.length === 0) {
+      console.log('No products found matching the search term.');
+      return res.status(404).json({ error: 'No products found' });
+    }
+
+    console.log(`Products found: ${products.length}`);
+
+    // Fetch images for each product if needed
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        try {
+          const images = await getProductImages(product.product_id);
+          return { ...product, images: images || [] }; // Fallback to empty array if no images
+        } catch (imageError) {
+          console.error(`Error fetching images for product ${product.product_id}:`, imageError);
+          return { ...product, images: [] }; // If image fetching fails, return product with empty images array
+        }
+      })
+    );
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(rowCount / limit);
+
+    // Return the list of products with their images, total pages, and current page
+    res.status(200).json({ 
+      status: "success", 
+      data: { 
+        products: productsWithImages, 
+        totalPages, 
+        currentPage: page 
+      } 
+    });
+  } catch (error) {
+    console.error('Error in getProductBySearchTermController:', error);
+    res.status(500).json({ error: 'Error fetching products' });
   }
 };
 

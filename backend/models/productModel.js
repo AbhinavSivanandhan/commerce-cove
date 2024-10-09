@@ -34,6 +34,23 @@ export const getProductById = async (product_id) => {
   return result.rows[0];
 };
 
+export const getProductBySearchTerm = async (searchTerm, limit, offset) => {
+  // Query to get products matching the search term with pagination
+  const result = await db.query(
+    'SELECT * FROM product WHERE description LIKE $1 LIMIT $2 OFFSET $3',
+    [`%${searchTerm}%`, limit, offset]
+  );
+
+  // Query to get the total count of products matching the search term
+  const total = await db.query(
+    'SELECT COUNT(*) FROM product WHERE description LIKE $1',
+    [`%${searchTerm}%`]
+  );
+
+  // Return the products and the total count
+  return { rows: result.rows || [], rowCount: parseInt(total.rows[0].count, 10) };
+};
+
 export const getAllProducts = async (limit, offset) => {
   const result = await db.query('SELECT * FROM product LIMIT $1 OFFSET $2', [limit, offset]);
   const total = await db.query('SELECT COUNT(*) FROM product');
