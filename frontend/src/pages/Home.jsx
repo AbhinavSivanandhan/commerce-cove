@@ -139,25 +139,32 @@ const Home = () => {
   }, [currentPage, isSearching]);//dependency array need not have issearching, fetchproducts handles it
 
 
-  const handleSearch = () => {
-    if (searchTerm.trim() === '') {
+  const handleSearch = () => { //careful, not idempotent
+    const trimmedSearchTerm = searchTerm.trim(); // Trim the search term directly
+    if (trimmedSearchTerm === '') {
       setError('Enter a value');
       return;
-    } else if (/^[a-zA-Z0-9]*$/.test(searchTerm) === false) {
+    } 
+    
+    if (/^[a-zA-Z0-9]*$/.test(trimmedSearchTerm) === false) {
       setError('Search term should be alphanumeric');
       return;
     }
+
     setLoading(true);
     setIsSearching(true);
-    setCurrentPage(1);
-    const searchUrl = isNaN(searchTerm)
-      ? `http://localhost:5001/api/v1/products/search/${searchTerm}?page=${currentPage}&limit=${limit}`
-      : `http://localhost:5001/api/v1/products/${searchTerm}`;
-  
+    setCurrentPage(1); 
+    const isNumericSearch = !isNaN(parseFloat(trimmedSearchTerm)) && isFinite(trimmedSearchTerm);
+    console.log(`isNumericSearch: ${isNumericSearch}`)
+    const searchUrl = !isNumericSearch
+      ? `http://localhost:5001/api/v1/products/search/${trimmedSearchTerm}?page=${currentPage}&limit=${limit}`
+      : `http://localhost:5001/api/v1/products/${trimmedSearchTerm}`;
+    console.log(`searchUrl: ${searchUrl}`)
+
     axios
       .get(searchUrl)
       .then((response) => {  
-        if (isNaN(searchTerm)) {
+        if (!isNumericSearch) {
           // Handle search by term (paginated response)
           const { products, totalPages, currentPage: responsePage } = response.data.data;
   

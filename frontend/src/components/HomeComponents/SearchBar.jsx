@@ -5,7 +5,7 @@ const SearchBar = ({ searchTerm, setSearchTerm, handleSearch, handleCancelSearch
     <div className="flex mb-4">
       <input
         type="text"
-        placeholder="Enter Product Name/ID"
+        placeholder="Enter Product Name"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="border border-gray-300 rounded px-4 py-2 mr-2"
