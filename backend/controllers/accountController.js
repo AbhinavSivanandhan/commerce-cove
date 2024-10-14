@@ -54,7 +54,7 @@ export const getStatus = (req, res) => {
   
   // Extract token from headers
   const token = req.headers.authorization?.split(' ')[1];
-  console.log('Received token:', token);
+  //console.log('Received token:', token);
 
   // Check if token is present
   if (!token) {
