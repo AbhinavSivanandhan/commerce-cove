@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { BsInfoCircle } from 'react-icons/bs';
 import { MdOutlineAddShoppingCart, MdRemoveShoppingCart, MdOutlineDelete } from 'react-icons/md';
@@ -22,24 +22,27 @@ const ProductCard = ({ products, role, handleCartToggle, isInCart }) => {
 
 const ProductCardItem = ({ product, role, handleCartToggle, isInCart }) => {
   const [currentImage, setCurrentImage] = useState(0);
+  const navigate = useNavigate();
 
-  const handlePrevImage = () => {
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
     setCurrentImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
   };
 
-  const handleNextImage = () => {
+  const handleNextImage = (e) => {
+    e.stopPropagation();
     setCurrentImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
   };
 
   return (
     <div 
       className="border p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow bg-white flex flex-col justify-between"
-      style={{ aspectRatio: '4 / 3' }} // 4:3 ratio for a squarish look
+      style={{ aspectRatio: '4 / 3' }}
+      onClick={() => navigate(`/products/details/${product.product_id}`)}
     >
       <div className="relative h-full w-full bg-white-200 flex items-center justify-center">
         {product.images && product.images.length > 0 ? (
           <div className="relative h-full w-full">
-            {/* Image without cropping */}
             <div className="flex justify-center h-full w-full">
               <img
                 src={product.images[currentImage].image_url}
@@ -48,7 +51,6 @@ const ProductCardItem = ({ product, role, handleCartToggle, isInCart }) => {
               />
             </div>
 
-            {/* Conditionally render buttons only if there is more than one image */}
             {product.images.length > 1 && (
               <>
                 <button
@@ -78,9 +80,9 @@ const ProductCardItem = ({ product, role, handleCartToggle, isInCart }) => {
         <h2 className="text-lg font-bold">{product.description}</h2>
         <p className="text-sm text-gray-600 mt-1 flex flex-wrap justify-center space-x-2">
           <span>Product ID: {product.product_id}</span> 
-          <span className="text-gray-400">•</span> {/* Modern separator */}
+          <span className="text-gray-400">•</span>
           <span>Price: ${product.price}</span> 
-          <span className="text-gray-400">•</span> 
+          <span className="text-gray-400">•</span>
           <span>
             In Stock: 
             <span className={product.instock ? 'text-green-600' : 'text-red-600'}>
@@ -94,22 +96,42 @@ const ProductCardItem = ({ product, role, handleCartToggle, isInCart }) => {
 
       {/* Action Buttons */}
       <div className="flex justify-center gap-4 mt-4">
-        <Link to={`/products/details/${product.product_id}`} className="hover:text-green-600 transition-colors">
-          <BsInfoCircle className="text-2xl" />
-        </Link>
+        {/* Info Button */}
+        <BsInfoCircle
+          className="text-2xl text-green-800 hover:text-green-600 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/products/details/${product.product_id}`);
+          }}
+        />
+
+        {/* Role-based actions */}
         {role !== 'customer' && (
           <>
-            <Link to={`/products/edit/${product.product_id}`} className="hover:text-yellow-500 transition-colors">
-              <AiOutlineEdit className="text-2xl" />
-            </Link>
-            <Link to={`/products/delete/${product.product_id}`} className="hover:text-red-500 transition-colors">
-              <MdOutlineDelete className="text-2xl" />
-            </Link>
+            <AiOutlineEdit
+              className="text-2xl text-yellow-600 hover:text-yellow-500 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/products/edit/${product.product_id}`);
+              }}
+            />
+            <MdOutlineDelete
+              className="text-2xl text-red-600 hover:text-red-500 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/products/delete/${product.product_id}`);
+              }}
+            />
           </>
         )}
+        
+        {/* Cart Toggle Button */}
         {role !== 'admin' && (
           <button
-            onClick={() => handleCartToggle(product.product_id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCartToggle(product.product_id);
+            }}
             className={`flex items-center px-2 py-1 rounded text-white hover:opacity-90 transition-opacity ${
               isInCart(product.product_id) ? 'bg-red-500' : 'bg-emerald-500'
             }`}

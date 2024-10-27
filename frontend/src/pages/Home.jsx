@@ -89,7 +89,7 @@ const Home = () => {
     const token = localStorage.getItem('token');
       // Check if token exists and is valid
     if (!token || await isTokenExpired(token)) {
-      toast.error('Session expired. Please log in again.');
+      //toast.error('Session expired. Please log in again.');
       localStorage.removeItem('token'); // Clear expired token
       // Redirect to login page if needed
       return;
