@@ -8,6 +8,7 @@ import SearchBar from '../components/HomeComponents/SearchBar';
 import ProductCard from '../components/HomeComponents/ProductCard';
 import ProductTable from '../components/HomeComponents/ProductTable';
 import Pagination from '../components/HomeComponents/Pagination';
+import { toast } from 'react-toastify';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -76,17 +77,7 @@ const Home = () => {
 
   const fetchCartItems = () => {
     const token = localStorage.getItem('token');
-<<<<<<< HEAD
-      // Check if token exists and is valid
-    if (!token || await isTokenExpired(token)) {
-      //toast.error('Session expired. Please log in again.');
-      localStorage.removeItem('token'); // Clear expired token
-      // Redirect to login page if needed
-      return;
-    }
-=======
->>>>>>> parent of 0d13e67 (handling token expiry and logged out scenario)
-    axios
+ axios
       .get('http://localhost:5001/api/v1/carts/view', {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -94,6 +85,7 @@ const Home = () => {
         setCartItems(response.data.data);
       })
       .catch((error) => {
+        toast.error('Error fetching cart items. Please try logging in again.');
         console.log('Error fetching cart items', error);
       });
   };
@@ -111,6 +103,7 @@ const Home = () => {
         fetchCartItems();
       })
       .catch((error) => {
+        toast.error('Error adding product to cart. Please try logging in again.');
         console.log('Error adding product to cart:', error);
       });
   };
@@ -126,6 +119,7 @@ const Home = () => {
         fetchCartItems();
       })
       .catch((error) => {
+        toast.error('Error adding product to cart. Please try logging in again.');
         console.log('Error removing product from cart:', error);
       });
   };
