@@ -8,8 +8,6 @@ import SearchBar from '../components/HomeComponents/SearchBar';
 import ProductCard from '../components/HomeComponents/ProductCard';
 import ProductTable from '../components/HomeComponents/ProductTable';
 import Pagination from '../components/HomeComponents/Pagination';
-const jwt_decode = (await import('jwt-decode')).default;
-import { toast } from 'react-toastify';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -75,18 +73,10 @@ const Home = () => {
       }
   };
 
-  const isTokenExpired = async (token) => {
-    try {
-      const jwt_decode = (await import('jwt-decode')).default;
-      const decoded = jwt_decode(token);
-      return decoded.exp * 1000 < Date.now(); // Convert expiration time to ms and compare
-    } catch (error) {
-      return true; // If decoding fails, consider token invalid
-    }
-  };
 
-  const fetchCartItems = async () => {
+  const fetchCartItems = () => {
     const token = localStorage.getItem('token');
+<<<<<<< HEAD
       // Check if token exists and is valid
     if (!token || await isTokenExpired(token)) {
       //toast.error('Session expired. Please log in again.');
@@ -94,6 +84,8 @@ const Home = () => {
       // Redirect to login page if needed
       return;
     }
+=======
+>>>>>>> parent of 0d13e67 (handling token expiry and logged out scenario)
     axios
       .get('http://localhost:5001/api/v1/carts/view', {
         headers: { Authorization: `Bearer ${token}` },
@@ -103,22 +95,11 @@ const Home = () => {
       })
       .catch((error) => {
         console.log('Error fetching cart items', error);
-        if (error.response?.data?.message.includes('jwt expired')) {
-          toast.error('Session expired. Please log in again.');
-          localStorage.removeItem('token'); // Clear token on server error as well
-        }
       });
   };
 
-  const handleAddToCart = async (productId) => {
+  const handleAddToCart = (productId) => {
     const token = localStorage.getItem('token');
-    // Check if token exists and is valid
-    if (!token || await isTokenExpired(token)) {
-      toast.error('Session expired. Please log in again.');
-      localStorage.removeItem('token'); // Clear expired token
-      // Redirect to login page if needed
-      return;
-    }
     axios
       .post(
         'http://localhost:5001/api/v1/carts/add',
@@ -131,10 +112,6 @@ const Home = () => {
       })
       .catch((error) => {
         console.log('Error adding product to cart:', error);
-        if (error.response?.data?.message.includes('jwt expired')) {
-          toast.error('Session expired. Please log in again.');
-          localStorage.removeItem('token'); // Clear token on server error as well
-        }
       });
   };
 
