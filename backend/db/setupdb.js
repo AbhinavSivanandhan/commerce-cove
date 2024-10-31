@@ -79,7 +79,7 @@ async function setupDatabase() {
         total_price DECIMAL(10, 2) NOT NULL,
         address TEXT NOT NULL,
         contact_details VARCHAR(255) NOT NULL,
-        status VARCHAR(20) DEFAULT 'paid'
+        transaction_id UUID NOT NULL
     );
     `;
 

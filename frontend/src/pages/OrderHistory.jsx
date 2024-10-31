@@ -13,9 +13,11 @@ const OrderHistory = () => {
     const [searchId, setSearchId] = useState('');
     const [error, setError] = useState('');
     const limit = 10;
+
     useEffect(() => {
       fetchOrderHistory();
     }, [currentPage]);
+
     const fetchOrderHistory = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
@@ -39,80 +41,68 @@ const OrderHistory = () => {
     const handlePageChange = (page) => {
       setCurrentPage(page);
     };
-  
 
-  const handleSearch = () => {
-    const token = localStorage.getItem('token');
-    if (searchId.trim() === '') {
-      fetchOrderHistory();
-      return;
-    }
-    else if (isNaN(searchId)) {
-      toast.error('Valid order ID should be numeric');
-      setError('Valid order ID should be numeric');
-      return;
-    }
-    setLoading(true);
-    axios
-      .get(`http://localhost:5001/api/v1/orders/${searchId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((response) => {
-        if (response.data.data.order) {
-          setOrders([response.data.data.order]);
-          setTotalPages(1);
-          setError('');
-        } else {
-          setProducts([]);
+    const handleSearch = () => {
+      const token = localStorage.getItem('token');
+      if (searchId.trim() === '') {
+        fetchOrderHistory();
+        return;
+      }
+      else if (isNaN(searchId)) {
+        toast.error('Valid order ID should be numeric');
+        setError('Valid order ID should be numeric');
+        return;
+      }
+      setLoading(true);
+      axios
+        .get(`http://localhost:5001/api/v1/orders/${searchId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then((response) => {
+          if (response.data.data.order) {
+            setOrders([response.data.data.order]);
+            setTotalPages(1);
+            setError('');
+          } else {
+            setProducts([]);
+            setError('No records found with that ID. Click on cancel to view the full list again.');
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.log('Error fetching order by ID:', error);
+          setLoading(false);
+          setOrders([]);
           setError('No records found with that ID. Click on cancel to view the full list again.');
+        });
+    };
+
+    const handleCancelSearch = () => {
+      setSearchId('');
+      setCurrentPage(1);
+      fetchOrderHistory();
+      setError('');
+    };
+
+    const getPaginationButtons = () => {
+      const buttons = [];
+      if (totalPages <= 4) {
+        for (let i = 1; i <= totalPages; i++) {
+          buttons.push(i);
         }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log('Error fetching order by ID:', error);
-        setLoading(false);
-        setOrders([]);
-        setError('No records found with that ID. Click on cancel to view the full list again.');
-      });
-  };
-  const handleCancelSearch = () => {
-    setSearchId('');
-    setCurrentPage(1);
-    fetchOrderHistory();
-    setError('');
-  };
-  const getPaginationButtons = () => {
-    const buttons = [];
-
-    if (totalPages <= 4) {
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(i);
+      } else {
+        buttons.push(1); // always show the first page
+        if (currentPage > 3) buttons.push('...');
+        const startPage = Math.max(2, currentPage - 1);
+        const endPage = Math.min(totalPages - 1, currentPage + 1);
+        for (let i = startPage; i <= endPage; i++) buttons.push(i);
+        if (currentPage < totalPages - 2) buttons.push('...');
+        buttons.push(totalPages); // always show the last page
       }
-    } else {
-      buttons.push(1); // always show the first page
-
-      if (currentPage > 3) {
-        buttons.push('...');
-      }
-
-      const startPage = Math.max(2, currentPage - 1);
-      const endPage = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = startPage; i <= endPage; i++) {
-        buttons.push(i);
-      }
-
-      if (currentPage < totalPages - 2) {
-        buttons.push('...');
-      }
-
-      buttons.push(totalPages); // always show the last page
-    }
-
-    return buttons;
-  };
+      return buttons;
+    };
   
   return (
     <>
@@ -120,7 +110,6 @@ const OrderHistory = () => {
     <div className='p-4'>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl my-8">Orders List</h1>
-
       </div>
       <div className="flex mb-4">
           <input
@@ -152,13 +141,14 @@ const OrderHistory = () => {
             <thead>
               <tr>
                 <th className='border border-slate-600 rounded-md'>S No.</th>
-                <th className='border border-slate-600 rounded-md'>order_id</th>
-                <th className='border border-slate-600 rounded-md max-md:hidden'>product_id</th>
-                <th className='border border-slate-600 rounded-md'>quantity</th>
+                <th className='border border-slate-600 rounded-md'>Order ID</th>
+                <th className='border border-slate-600 rounded-md'>Transaction ID</th>
+                <th className='border border-slate-600 rounded-md max-md:hidden'>Product ID</th>
+                <th className='border border-slate-600 rounded-md'>Quantity</th>
                 <th className='border border-slate-600 rounded-md'>Status</th>
                 <th className='border border-slate-600 rounded-md'>Total Price</th>
-                <th className='border border-slate-600 rounded-md max-md:hidden'>address</th>
-                <th className='border border-slate-600 rounded-md max-md:hidden'>contact_details</th>
+                <th className='border border-slate-600 rounded-md max-md:hidden'>Address</th>
+                <th className='border border-slate-600 rounded-md max-md:hidden'>Contact Details</th>
                 <th className='border border-slate-600 rounded-md'>Actions</th>
               </tr>
             </thead>
@@ -168,25 +158,28 @@ const OrderHistory = () => {
                   <td className='border border-slate-700 rounded-md text-center'>
                     {(currentPage - 1) * limit + index + 1}
                   </td>
-                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
+                  <td className='border border-slate-700 rounded-md text-center'>
                     {order.order_id}
                   </td>
                   <td className='border border-slate-700 rounded-md text-center'>
+                    {order.transaction_id || 'N/A'}
+                  </td>
+                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
                     {order.product_id}
                   </td>
-                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
+                  <td className='border border-slate-700 rounded-md text-center'>
                     {order.quantity}
                   </td>
-                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
+                  <td className='border border-slate-700 rounded-md text-center'>
                     {order.status}
                   </td>
                   <td className='border border-slate-700 rounded-md text-center'>
                     {order.total_price}
                   </td>
-                  <td className='border border-slate-700 rounded-md text-center'>
+                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
                     {order.address}
                   </td>
-                  <td className='border border-slate-700 rounded-md text-center'>
+                  <td className='border border-slate-700 rounded-md text-center max-md:hidden'>
                     {order.contact_details}
                   </td>
                   <td className='border border-slate-700 rounded-md text-center'>
@@ -220,4 +213,4 @@ const OrderHistory = () => {
   )
 }
 
-export default OrderHistory
+export default OrderHistory;
