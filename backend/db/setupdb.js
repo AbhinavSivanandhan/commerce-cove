@@ -80,7 +80,8 @@ async function setupDatabase() {
         address TEXT NOT NULL,
         contact_details VARCHAR(255) NOT NULL,
         transaction_id UUID NOT NULL,
-        status VARCHAR(20) DEFAULT 'pending'
+        status VARCHAR(20) DEFAULT 'pending',
+        created_at TIMESTAMPTZ DEFAULT NOW()
     );
     `;
 
