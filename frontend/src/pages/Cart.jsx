@@ -143,66 +143,101 @@ const Cart = () => {
     });
 
   }
+  
   const handleCheckoutSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-    let orderIds = [];
+    console.log("Token retrieved from localStorage:", token);
+
     const inStockItems = cartItems.filter(item => item.instock);
-    if (!address) {
-      setError('Address is required.');
-      toast.error('Address is required.');
-      return;
-    }
-    
-    if (!contact_details) {
-      setError('Contact details are required.');
-      toast.error('Contact details are required.');
-      return;
-    }
+    console.log("Filtered in-stock items:", inStockItems);
 
-    if (!address || !contact_details || inStockItems.length === 0) {
-      setError('All fields are required and at least one in-stock item must be in cart.');
-      toast.error('All fields are required and at least one in-stock item must be in cart.');
-      return;
-    }
-
-    if (!confirm_check) {
-      setError('Confirm your details!');
-      toast.error('Confirm your details!');
-      return;
-    }
-  
     try {
-      const response = await axios.post(`http://localhost:5001/api/v1/orders/checkout`, { address, contact_details, inStockItems }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      // alert('Order placed successfully');
-      console.log(JSON.stringify(response.data.orders, null, 2));
-      // Extracting order IDs
-      orderIds = response.data.orders.map(order => order.order_id);
-      console.log('Order IDs:', orderIds);
-      
-      setShowModal(false);
-      if (!codChecked) {
-        const paymentSuccessful = await makePayment(orderIds);
-        if (paymentSuccessful) {
-          // Do not update the order status here, it will be updated via success page
-          console.log('Redirected to Stripe checkout');
-        }
-      } else {
-        // Directly update the order status if COD is selected
-        await updateOrderStatus(orderIds, 'cod');
-        toast.success('Order placed successfully with COD');
-        navigate('/');
-      }
+        console.log("Attempting to enqueue reservation with checkout details:", {
+            address,
+            contact_details,
+            inStockItems
+        });
+
+        const response = await axios.post(
+            `http://localhost:5001/api/v1/orders/checkout`,
+            { address, contact_details, inStockItems },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log("Reservation response received:", response.data);
+
+        const { transaction_id } = response.data;
+        console.log(`Reservation enqueued with transaction ID: ${transaction_id}`);
+
+        let retryCount = 0;
+        const maxRetries = 5; // Set max retries
+        const interval = setInterval(async () => {
+            try {
+                console.log(`Attempting to check status of transaction ${transaction_id}, Retry count: ${retryCount}`);
+
+                const statusResponse = await axios.get(
+                    `http://localhost:5001/api/v1/orders/status/${transaction_id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                console.log("Status response received:", statusResponse.data);
+
+                if (statusResponse.data.status === 'accepted') {
+                    console.log(`Reservation accepted for transaction ID: ${transaction_id}`);
+                    clearInterval(interval);
+                    const orderIds = statusResponse.data.orders.map(order => order.order_id);
+                    console.log('Order IDs:', orderIds);
+
+                    // Proceed to payment if applicable
+                    if (!codChecked) {
+                        console.log("Proceeding to payment with order IDs:", orderIds);
+                        const paymentSuccessful = await makePayment(orderIds);
+                        if (paymentSuccessful) {
+                            console.log('Redirected to Stripe checkout');
+                        } else {
+                            console.log("Payment unsuccessful.");
+                        }
+                    } else {
+                        console.log("Placing order with COD for order IDs:", orderIds);
+                        await updateOrderStatus(orderIds, 'cod');
+                        toast.success('Order placed successfully with COD');
+                        navigate('/');
+                    }
+                } else if (statusResponse.data.status === 'failed') {
+                    console.log(`Reservation failed for transaction ID: ${transaction_id}`);
+                    clearInterval(interval);
+                    toast.error('Reservation failed. Please try again.');
+                } else {
+                    retryCount++;
+                    if (retryCount >= maxRetries) {
+                        console.log("Max retries reached. Stopping status checks for transaction ID:", transaction_id);
+                        clearInterval(interval);
+                        toast.error("Unable to confirm reservation. Please try again later.");
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking order status for transaction ID:", transaction_id, "Error:", error);
+                clearInterval(interval);
+                toast.error("Error checking reservation status.");
+            }
+        }, 5000); // Poll every 5 seconds
     } catch (error) {
-      console.error('Error checking out', error);
-      setError(error.response ? error.response.data.message : 'Error checking out');
-      toast.error('Error checking out');
+        console.error('Error during checkout process:', error);
+        if (error.response) {
+            console.error('Error response data:', error.response.data);
+            console.error('Error response status:', error.response.status);
+            console.error('Error response headers:', error.response.headers);
+        } else if (error.request) {
+            console.error('Error request made but no response received:', error.request);
+        } else {
+            console.error('Error message:', error.message);
+        }
+        toast.error('Error checking out');
     }
-  };  
+};
+
+ 
 
   if (loading) return <p>Loading...</p>;
 

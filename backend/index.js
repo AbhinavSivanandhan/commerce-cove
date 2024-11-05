@@ -68,6 +68,9 @@ app.post('/create-checkout-session', async (request, response) => {
   }
 });
 
+app.get('/api/v1/health-check', (req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
 
 // Error handling middleware
 app.use(errorHandler);

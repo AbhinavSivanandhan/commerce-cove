@@ -49,3 +49,19 @@ export const updateOrderStatusById = async (orderId, status) => {
   const result = await db.query('UPDATE order_history SET status = $2 WHERE order_id = $1 RETURNING *;', [orderId, status]);
   return result.rows[0];
 }
+
+export const getOrderByTransactionId = async (transaction_id) => {
+  const result = await db.query(
+    'SELECT * FROM order_history WHERE transaction_id = $1',
+    [transaction_id]
+  );
+
+  return result.rows;
+};
+
+export const updateOrderStatusByTransactionId = async (transaction_id, status) => {
+  return await db.query(
+    'UPDATE order_history SET status = $2 WHERE transaction_id = $1 RETURNING *;',
+    [transaction_id, status]
+  );
+};
