@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import BackButton from '../components/BackButton';
+import Spinner from '../components/Spinner';
 import { loadStripe } from '@stripe/stripe-js';
 import { toast } from 'react-toastify';
 import CartItemsList from '../components/CartComponents/CartItemsList';
@@ -11,7 +12,7 @@ import CheckoutModal from '../components/CartComponents/CheckoutModal';
 const Cart = () => {
   const stripePromise = loadStripe('pk_test_51PWMd8Ron26oqThkOjUtJ4jPGKy9qPogXwxOyBQ3ENGV7QJO5uFzXm7m62KypNy2VkyOSYohOQRcs0spHsjsisq3003vNjNB7O');
   const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [address, setAddress] = useState('');
@@ -23,6 +24,7 @@ const Cart = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    setLoading(true);
     axios.get('http://localhost:5001/api/v1/carts/view', {
       headers: {
         Authorization: `Bearer ${token}`
@@ -148,7 +150,7 @@ const Cart = () => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     console.log("Token retrieved from localStorage:", token);
-
+    setLoading(true);
     const inStockItems = cartItems.filter(item => item.instock);
     console.log("Filtered in-stock items:", inStockItems);
 
@@ -197,32 +199,38 @@ const Cart = () => {
                             console.log('Redirected to Stripe checkout');
                         } else {
                             console.log("Payment unsuccessful.");
+                            setLoading(false); // Stop loading if payment fails
                         }
                     } else {
                         console.log("Placing order with COD for order IDs:", orderIds);
                         await updateOrderStatus(orderIds, 'cod');
                         toast.success('Order placed successfully with COD');
                         navigate('/');
+                        setLoading(false); // Stop loading on navigation, but not needed
                     }
                 } else if (statusResponse.data.status === 'failed') {
                     console.log(`Reservation failed for transaction ID: ${transaction_id}`);
                     clearInterval(interval);
+                    setLoading(false); // Stop loading if failure
                     toast.error('Reservation failed. Please try again.');
                 } else {
                     retryCount++;
                     if (retryCount >= maxRetries) {
                         console.log("Max retries reached. Stopping status checks for transaction ID:", transaction_id);
                         clearInterval(interval);
+                        setLoading(false); // Stop loading if max retries reached
                         toast.error("Unable to confirm reservation. Please try again later.");
                     }
                 }
             } catch (error) {
                 console.error("Error checking order status for transaction ID:", transaction_id, "Error:", error);
                 clearInterval(interval);
+                setLoading(false); // Stop loading on error
                 toast.error("Error checking reservation status.");
             }
         }, 5000); // Poll every 5 seconds
     } catch (error) {
+        setLoading(false); // Stop loading on error
         console.error('Error during checkout process:', error);
         if (error.response) {
             console.error('Error response data:', error.response.data);
@@ -239,12 +247,13 @@ const Cart = () => {
 
  
 
-  if (loading) return <p>Loading...</p>;
+  // if (loading) return <p>Loading...</p>;
 
   return (
     <>
     <Header />
     <div className="p-4">
+      {loading && <Spinner />}
       {/* <BackButton text="Return home" /> */}
       <h1 className="text-3xl mb-4">Cart</h1>
       <CartItemsList cartItems={cartItems} onQuantityChange={handleQuantityChange} onDelete={handleDelete} />
