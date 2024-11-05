@@ -85,7 +85,7 @@ const Home = () => {
         setCartItems(response.data.data);
       })
       .catch((error) => {
-        toast.error('Error fetching cart items. Please try logging in again.');
+        toast.error('Please log in for the best experience!');
         console.log('Error fetching cart items', error);
       });
   };

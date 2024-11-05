@@ -15,7 +15,7 @@ const updateStaleAcceptedOrders = async () => {
 
     // Query for accepted orders that were created more than 20 minutes ago
     const { rows: staleOrders } = await db.query(
-      `SELECT order_id FROM order_history WHERE status = 'accepted' AND created_at <= $1 FOR UPDATE SKIP LOCKED`,
+      `SELECT order_id FROM order_history WHERE status IN ('accepted', 'pending') AND created_at <= $1 FOR UPDATE SKIP LOCKED`,
       [cutoffTime]
     );
 

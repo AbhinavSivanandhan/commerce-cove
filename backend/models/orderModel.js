@@ -10,7 +10,7 @@ export const insertOrder = async (user_id, product_id, quantity, total_price, ad
 };
 
 export const getAllOrders = async (limit, offset) => {
-  const result = await db.query('SELECT * FROM order_history LIMIT $1 OFFSET $2', [limit, offset]);
+  const result = await db.query('SELECT * FROM order_history ORDER BY order_id DESC LIMIT $1 OFFSET $2', [limit, offset]);
   const total = await db.query('SELECT COUNT(*) FROM order_history');
   return { rows: result.rows, rowCount: parseInt(total.rows[0].count, 10) };
 };
@@ -20,7 +20,7 @@ export const getMyOrders = async (user_id, limit, offset) => {
   
   try {
     const result = await db.query(
-      'SELECT * FROM order_history WHERE user_id=$1 LIMIT $2 OFFSET $3', 
+      'SELECT * FROM order_history WHERE user_id=$1 ORDER BY order_id DESC LIMIT $2 OFFSET $3', 
       [user_id, limit, offset]
     );
     console.log(`Query result count: ${result.rows.length}`);

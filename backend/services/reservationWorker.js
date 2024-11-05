@@ -63,8 +63,8 @@ const processReservation = async (reservation, acknowledge) => {
 const startWorker = async () => {
   await initRabbitMQ();
   console.log("Worker started and listening for reservations...");
-  await purgeQueue();
-  console.log("Queue cleared (remove it if not needed)...");
+  // await purgeQueue();
+  // console.log("Queue cleared (remove it if not needed)...");
   await consumeReservation((reservation, acknowledge) => {
     processReservation(reservation, acknowledge);
   });
