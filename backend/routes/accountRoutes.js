@@ -9,7 +9,9 @@ router.post('/register', validateRegister, rateLimitMiddleware(200, 3600, 10000)
 router.post('/login', validateLogin, rateLimitMiddleware(200, 3600, 10000), loginUser);
 router.get('/status', rateLimitMiddleware(200, 3600, 10000), getStatus);
 router.post('/logout', rateLimitMiddleware(200, 3600, 10000), (req, res) => {
-  res.json({ message: 'Logout successful' });
-});//i guess this isn't being used since login page directly removed token when button triggers handleLogout
+  res.clearCookie('token', { httpOnly: true, sameSite: 'Strict', secure: process.env.NODE_ENV === 'production' });
+  res.clearCookie('role', { httpOnly: true, sameSite: 'Strict', secure: process.env.NODE_ENV === 'production' });
+  res.status(200).json({ message: 'Logout successful' });
+});
 
 export default router;

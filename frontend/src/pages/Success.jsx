@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { toast } from 'react-toastify';
@@ -26,7 +26,7 @@ const Success = () => {
         status: 'paid'
       };
       try {
-        await axios.put('http://localhost:5001/api/v1/orders/updateStatus', data, {
+        await axiosInstance.put('http://localhost:5001/api/v1/orders/updateStatus', data, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"

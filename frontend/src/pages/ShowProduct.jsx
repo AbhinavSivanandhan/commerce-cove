@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useParams } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import Spinner from '../components/Spinner';
@@ -11,21 +11,22 @@ const ShowProduct = () => {
   const { id } = useParams();
 
   useEffect(() => {
-    setLoading(true);
-    axios
-      .get(`http://localhost:5001/api/v1/products/${id}`)
-      .then((response) => {
-        console.log(response);
-        setProduct(response.data);  // Now the product includes images as well
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get(`/products/${id}`);
+        setProduct(response.data); // Product includes images as well
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchProduct();
   }, [id]);
 
-  // Carousel logic: simple manual navigation with state
+  // Carousel logic
   const [currentImage, setCurrentImage] = useState(0);
 
   const handlePrevImage = () => {
@@ -88,21 +89,18 @@ const ShowProduct = () => {
                     <td className="py-3 px-4 font-semibold text-gray-600 border-b border-gray-300">Company Name</td>
                     <td className="py-3 px-4 border-b border-gray-300">{product.companyname}</td>
                   </tr>
-                  {/* Carousel for images */}
                   {product.images && product.images.length > 0 && (
                     <tr className="hover:bg-gray-100 transition-all">
                       <td className="py-3 px-4 font-semibold text-gray-600 border-b border-gray-300">Product Images</td>
                       <td className="py-3 px-4 border-b border-gray-300">
                         <div className="relative w-full">
                           <div className="flex justify-center">
-                            {/* Full image without cropping */}
                             <img
                               src={product.images[currentImage].image_url}
                               alt={`Product image ${currentImage + 1}`}
                               className="max-w-full max-h-80 object-contain rounded-md shadow-md"
                             />
                           </div>
-                          {/* Navigation Buttons */}
                           <button
                             className="absolute top-1/2 left-0 p-2 transform -translate-y-1/2 bg-gray-500 text-white rounded-full"
                             onClick={handlePrevImage}

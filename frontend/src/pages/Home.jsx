@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
+import { fetchUserStatus } from '../api/authApi'; // Import fetchUserStatus
 import Spinner from '../components/Spinner';
 import { Link } from 'react-router-dom';
 import { MdOutlineAddBox } from 'react-icons/md';
@@ -24,103 +25,87 @@ const Home = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    const userRole = localStorage.getItem('role');
-    setRole(userRole);
+    const fetchRoleAndCart = async () => {
+      const user = await fetchUserStatus(); // Fetch user status
+      if (user) {
+        setRole(user.role); // Update role
+        if (user.role !== 'admin') {
+          fetchCartItems(); // Fetch cart items for non-admin users
+        }
+      } else {
+        toast.error('Failed to fetch user status.');
+      }
+    };
+    fetchRoleAndCart();
     fetchProducts();
+  }, []);
 
-    // Only fetch cart items if the user is not an admin
-    if (userRole !== 'admin') {
-      fetchCartItems();
-    }
+  // Update handlePageChange to trigger the correct function
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    fetchProducts();
   }, [currentPage]);
 
   const fetchProducts = () => {
     setLoading(true);
-    if (!isSearching){
-    axios
-      .get(`http://localhost:5001/api/v1/products?page=${currentPage}&limit=${limit}`)
+    const endpoint = isSearching
+      ? `/products/search/${searchTerm}?page=${currentPage}&limit=${limit}`
+      : `/products?page=${currentPage}&limit=${limit}`;
+    axiosInstance
+      .get(endpoint)
       .then((response) => {
-        setProducts(response.data.data.products);
-        setTotalPages(response.data.data.totalPages);
+        const { products, totalPages, currentPage: responsePage } = response.data.data;
+        setProducts(products || []);
+        setTotalPages(totalPages || 1);
+        setCurrentPage(responsePage || 1);
+        setError('');
         setLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        console.error('Error fetching products:', error);
         setLoading(false);
+        setError('Failed to fetch products.');
       });
-    } else {
-      axios
-      .get(`http://localhost:5001/api/v1/products/search/${searchTerm}?page=${currentPage}&limit=${limit}`)
-      .then((response) => { 
-          // Handle search by term (paginated response)
-          setLoading(false);
-          const { products, totalPages, currentPage: responsePage } = response.data.data;
-          if (products && products.length > 0) {
-            setProducts(products);
-            setTotalPages(totalPages);
-            setCurrentPage(responsePage); // Update the current page to match the response
-            setError('');
-          } else {
-            setProducts([]);
-            setError('No other records found with that term. Click on cancel to view the full list again.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error during search:', error);
-          setLoading(false);
-          setProducts([]);
-          setError('No records found with that term. Click on cancel to view the full list again.');
-        });
-      }
-  };
-
+    };
 
   const fetchCartItems = () => {
-    const token = localStorage.getItem('token');
- axios
-      .get('http://localhost:5001/api/v1/carts/view', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    axiosInstance
+      .get('/carts/view')
       .then((response) => {
-        setCartItems(response.data.data);
+        setCartItems(response.data.data || []);
       })
       .catch((error) => {
-        toast.error('Please log in for the best experience!');
-        console.log('Error fetching cart items', error);
+        console.error('Error fetching cart items:', error);
+        toast.error('Please log in for the best experience.');
       });
   };
 
   const handleAddToCart = (productId) => {
-    const token = localStorage.getItem('token');
-    axios
-      .post(
-        'http://localhost:5001/api/v1/carts/add',
-        { cart_type: "primary", product_id: productId, quantity: 1 }, // Default quantity to 1
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then((response) => {
-        console.log('Product added to cart:', response.data);
+    axiosInstance
+      .post('/carts/add', { cart_type: 'primary', product_id: productId, quantity: 1 })
+      .then(() => {
         fetchCartItems();
+        toast.success('Product added to cart!');
       })
       .catch((error) => {
-        toast.error('Error adding product to cart. Please try logging in again.');
-        console.log('Error adding product to cart:', error);
+        console.error('Error adding product to cart:', error);
+        toast.error('Failed to add product to cart.');
       });
   };
 
   const handleRemoveFromCart = (productId) => {
-    const token = localStorage.getItem('token');
-    axios
-      .delete(`http://localhost:5001/api/v1/carts/delete/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        console.log('Product removed from cart:', response.data);
+    axiosInstance
+      .delete(`/carts/delete/${productId}`)
+      .then(() => {
         fetchCartItems();
+        toast.success('Product removed from cart!');
       })
       .catch((error) => {
-        toast.error('Error adding product to cart. Please try logging in again.');
-        console.log('Error removing product from cart:', error);
+        console.error('Error removing product from cart:', error);
+        toast.error('Failed to remove product from cart.');
       });
   };
 
@@ -132,59 +117,41 @@ const Home = () => {
     }
   };
 
-  // Update handlePageChange to trigger the correct function
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  // Call fetchProducts and handleSearch in useEffect based on currentPage changes
-  useEffect(() => {
-      fetchProducts(); // Fetch regular products if no search is active
-  }, [currentPage, isSearching]);//dependency array need not have issearching, fetchproducts handles it
-
-
-  const handleSearch = () => { //careful, not idempotent
-    const trimmedSearchTerm = searchTerm.trim(); // Trim the search term directly
+  const handleSearch = () => {
+    const trimmedSearchTerm = searchTerm.trim();
     if (trimmedSearchTerm === '') {
       setError('Enter a value');
       return;
-    } 
-    
-    if (/^[a-zA-Z0-9]*$/.test(trimmedSearchTerm) === false) {
+    }
+    if (!/^[a-zA-Z0-9]*$/.test(trimmedSearchTerm)) {
       setError('Search term should be alphanumeric');
       return;
     }
 
     setLoading(true);
     setIsSearching(true);
-    setCurrentPage(1); 
+    setCurrentPage(1);
     const isNumericSearch = !isNaN(parseFloat(trimmedSearchTerm)) && isFinite(trimmedSearchTerm);
-    console.log(`isNumericSearch: ${isNumericSearch}`)
     const searchUrl = !isNumericSearch
-      ? `http://localhost:5001/api/v1/products/search/${trimmedSearchTerm}?page=${currentPage}&limit=${limit}`
-      : `http://localhost:5001/api/v1/products/${trimmedSearchTerm}`;
-    console.log(`searchUrl: ${searchUrl}`)
+      ? `/products/search/${trimmedSearchTerm}?page=${currentPage}&limit=${limit}`
+      : `/products/${trimmedSearchTerm}`;
 
-    axios
+    axiosInstance
       .get(searchUrl)
-      .then((response) => {  
+      .then((response) => {
         if (!isNumericSearch) {
-          // Handle search by term (paginated response)
           const { products, totalPages, currentPage: responsePage } = response.data.data;
-  
           if (products && products.length > 0) {
             setProducts(products);
             setTotalPages(totalPages);
-            setCurrentPage(responsePage); // Update the current page to match the response
+            setCurrentPage(responsePage);
             setError('');
           } else {
             setProducts([]);
             setError('No records found with that term. Click on cancel to view the full list again.');
           }
         } else {
-          // Handle search by ID
           const product = response.data;
-  
           if (product && product.product_id) {
             setProducts([product]);
             setTotalPages(1);
@@ -203,6 +170,7 @@ const Home = () => {
         setError('No records found with that term. Click on cancel to view the full list again.');
       });
   };
+
   
 
   const handleCancelSearch = () => {

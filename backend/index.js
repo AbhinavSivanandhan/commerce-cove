@@ -9,6 +9,7 @@ import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import errorHandler from './middleware/errorMiddleware.js'; // Import error handler
 import Stripe from 'stripe';
+import cookieParser from 'cookie-parser';
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET)
 
@@ -24,7 +25,21 @@ setupDatabase().then(() => {
 const app = express();
 
 // Middleware
-app.use(cors());
+// Middleware
+const allowedOrigins = ['http://localhost:5173'];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
+app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // this will allow to read req.body
 //using route based ratelimiting instead. factory function
 //app.use(globalRateLimiter); // Apply global rate limiter before all other routes (applies to the whole app)
@@ -39,7 +54,7 @@ app.get('/', (request, response) => {
   return response.send('Welcome to CommerceCove');
 });
 
-app.post('/create-checkout-session', async (request, response) => {
+app.post('/api/v1/create-checkout-session', async (request, response) => {
   const { products, orderIds } = request.body;
   // Construct line items for the checkout session
   const lineItems = products.map((product) => ({

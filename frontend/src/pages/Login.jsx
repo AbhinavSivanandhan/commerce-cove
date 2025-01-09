@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import Spinner from '../components/Spinner';
@@ -14,14 +14,12 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5001/api/v1/accounts/login', { username, password });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('role', response.data.role);
+      await axiosInstance.post('/accounts/login', { username, password });
       setLoading(false);
       toast.success('Welcome!');
-      navigate('/');
+      navigate('/'); // Redirect to the home page
     } catch (error) {
-      console.log(error);
+      console.error(error);
       setLoading(false);
       toast.error('Invalid Credentials!');
     }

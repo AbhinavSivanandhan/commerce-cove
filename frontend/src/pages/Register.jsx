@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
 import Spinner from '../components/Spinner';
@@ -15,13 +15,14 @@ const Register = () => {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/v1/accounts/register', { username, password, role });
+      await axiosInstance.post('/accounts/register', { username, password, role }); // Simplified URL
       setLoading(false);
-      navigate('/login');
+      toast.success('Registration successful!');
+      navigate('/login'); // Redirect to login page
     } catch (error) {
-      console.log(error);
+      console.error('Registration error:', error);
       setLoading(false);
-      toast.error('Registration failed');
+      toast.error('Registration failed. Please try again.');
     }
   };
 
