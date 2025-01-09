@@ -49,11 +49,13 @@ const Home = () => {
     fetchProducts();
   }, [currentPage]);
 
-  const fetchProducts = () => {
+  const fetchProducts = (isSearch = isSearching) => {
     setLoading(true);
-    const endpoint = isSearching
+  
+    const endpoint = isSearch
       ? `/products/search/${searchTerm}?page=${currentPage}&limit=${limit}`
       : `/products?page=${currentPage}&limit=${limit}`;
+  
     axiosInstance
       .get(endpoint)
       .then((response) => {
@@ -69,7 +71,8 @@ const Home = () => {
         setLoading(false);
         setError('Failed to fetch products.');
       });
-    };
+  };
+  
 
   const fetchCartItems = () => {
     axiosInstance
@@ -171,14 +174,12 @@ const Home = () => {
       });
   };
 
-  
-
   const handleCancelSearch = () => {
     setSearchTerm('');
     setCurrentPage(1);
     setIsSearching(false); // Reset search state
-    //fetchProducts();
     setError('');
+    fetchProducts(false); // Pass false to explicitly fetch all products
   };
 
   const isInCart = (productId) => {
