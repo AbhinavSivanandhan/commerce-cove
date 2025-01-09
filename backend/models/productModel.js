@@ -37,13 +37,13 @@ export const getProductById = async (product_id) => {
 export const getProductBySearchTerm = async (searchTerm, limit, offset) => {
   // Query to get products matching the search term with pagination
   const result = await db.query(
-    'SELECT * FROM product WHERE description LIKE $1 LIMIT $2 OFFSET $3',
+    'SELECT * FROM product WHERE description ILIKE $1 LIMIT $2 OFFSET $3',
     [`%${searchTerm}%`, limit, offset]
   );
 
   // Query to get the total count of products matching the search term
   const total = await db.query(
-    'SELECT COUNT(*) FROM product WHERE description LIKE $1',
+    'SELECT COUNT(*) FROM product WHERE description ILIKE $1',
     [`%${searchTerm}%`]
   );
 

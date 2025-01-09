@@ -102,7 +102,7 @@ export const getProductByIdController = async (req, res) => {
   }
 };
 
-// Get a single product by search term
+// Get product(s) by search term
 export const getProductBySearchTermController = async (req, res) => {
   try {
     const searchTerm = req.params.searchTerm;
