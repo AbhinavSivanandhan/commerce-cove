@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import Spinner from '../components/Spinner';
 import Header from '../components/Header';
+import Pagination from '../components/HomeComponents/Pagination'; // Reuse the Pagination component
 import { toast } from 'react-toastify';
 
 const OrderHistory = () => {
@@ -77,24 +78,6 @@ const OrderHistory = () => {
     setError('');
   };
 
-  const getPaginationButtons = () => {
-    const buttons = [];
-    if (totalPages <= 4) {
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(i);
-      }
-    } else {
-      buttons.push(1);
-      if (currentPage > 3) buttons.push('...');
-      const startPage = Math.max(2, currentPage - 1);
-      const endPage = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = startPage; i <= endPage; i++) buttons.push(i);
-      if (currentPage < totalPages - 2) buttons.push('...');
-      buttons.push(totalPages);
-    }
-    return buttons;
-  };
-
   return (
     <>
       <Header />
@@ -145,7 +128,7 @@ const OrderHistory = () => {
               </thead>
               <tbody>
                 {orders.map((order, index) => (
-                  <tr key={order.order_id} className="h-8">
+                  <tr key={`order-${order.order_id}`} className="h-8">
                     <td className="border border-slate-700 rounded-md text-center">
                       {(currentPage - 1) * limit + index + 1}
                     </td>
@@ -180,25 +163,11 @@ const OrderHistory = () => {
                 ))}
               </tbody>
             </table>
-            <div className="flex justify-center mt-4">
-              {getPaginationButtons().map((page, index) =>
-                page === '...' ? (
-                  <span key={index} className="px-3 py-1 mx-1">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 mx-1 ${
-                      page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                )
-              )}
-            </div>
+            <Pagination
+              totalPages={totalPages}
+              currentPage={currentPage}
+              handlePageChange={handlePageChange}
+            />
           </>
         )}
       </div>
