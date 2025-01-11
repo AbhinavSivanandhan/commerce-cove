@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import { createUser, findUserByUsername } from '../models/userModel.js';
-import { createAccountEmail, findAccountEmailByUserId, verifyAccountEmail, findAccountEmailByToken } from '../models/emailModel.js';
+import { createAccountEmail, findAccountEmailByUserId, verifyAccountEmail, findAccountEmailByEmail, findAccountEmailByToken } from '../models/emailModel.js';
 import { generateVerificationToken } from '../utils/tokenUtils.js';
 
 dotenv.config();
@@ -36,6 +36,12 @@ export const registerUser = async (req, res) => {
   }
 
   try {
+    // Check if the email is already registered
+    const existingEmailRecord = await findAccountEmailByEmail(email);
+    if (existingEmailRecord) {
+      console.warn('Duplicate email detected:', email);
+      return res.status(400).json({ message: 'This email is already associated with another account.' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     console.info('Password hashed successfully');
 
@@ -50,9 +56,9 @@ export const registerUser = async (req, res) => {
       console.info('Sending verification email to:', email);
 
       const transporter = nodemailer.createTransport({
-        host: EMAIL_HOST, // Set to "smtp.protonmail.com" for ProtonMail
-        port: EMAIL_PORT || 587, // Common SMTP port
-        secure: EMAIL_PORT == 465, // true for 465, false for 587
+        host: EMAIL_HOST, 
+        port: EMAIL_PORT || 587, 
+        secure: EMAIL_PORT == 465, 
         auth: {
           user: EMAIL_USER,
           pass: EMAIL_PASS,
@@ -74,6 +80,10 @@ export const registerUser = async (req, res) => {
       res.status(201).json({ message: 'Registration successful.' });
     }
   } catch (error) {
+    if (error.code === '23505') { // PostgreSQL duplicate key error
+      console.warn('Duplicate email registration attempt:', email);
+      return res.status(400).json({ message: 'This email is already associated with another account.' });
+    }
     console.error('Error during registration:', error.message);
     res.status(500).json({ message: 'Error registering user' });
   }

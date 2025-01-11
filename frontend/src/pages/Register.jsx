@@ -23,7 +23,12 @@ const Register = () => {
     } catch (error) {
       console.error('Registration error:', error);
       setLoading(false);
-      toast.error('Registration failed. Please try again.');
+      // Check for duplicate email error
+      if (error.response && error.response.status === 400 && error.response.data.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Registration failed. Please try again. Try with unique usename + email');
+      }
     }
   };
 

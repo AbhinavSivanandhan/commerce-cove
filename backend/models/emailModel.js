@@ -23,6 +23,21 @@ export const findAccountEmailByUserId = async (user_id) => {
   }
 };
 
+export const findAccountEmailByEmail = async (email) => {
+  try {
+    const result = await db.query('SELECT * FROM account_email WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      console.info(`No account found for email: ${email}`);
+      return null;
+    }
+    console.info(`Account email record found for email: ${email}`);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error querying email by email:', error.message);
+    throw error;
+  }
+};
+
 export const findAccountEmailByToken = async (token) => {
   try {
     const result = await db.query(
