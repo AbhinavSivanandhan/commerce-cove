@@ -19,9 +19,14 @@ const Login = () => {
       toast.success('Welcome!');
       navigate('/'); // Redirect to the home page
     } catch (error) {
-      console.error(error);
+      console.error('Login error:', error);
       setLoading(false);
-      toast.error('Invalid Credentials!');
+      const errorMessage =
+        error.response?.data?.message || 'Invalid credentials. Please try again.';
+      toast.error(errorMessage);
+      if (errorMessage.includes('Email not verified')) {
+        navigate('/verify-email');
+      }
     }
   };
 

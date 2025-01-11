@@ -1,24 +1,80 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 import { createUser, findUserByUsername } from '../models/userModel.js';
+import { createAccountEmail, findAccountEmailByUserId, verifyAccountEmail, findAccountEmailByToken } from '../models/emailModel.js';
+import { generateVerificationToken } from '../utils/tokenUtils.js';
 
 dotenv.config();
-const { JWT_SECRET } = process.env;
+
+const {
+  JWT_SECRET,
+  EMAIL_USER,
+  EMAIL_PASS,
+  FRONTEND_URL,
+  ENABLE_EMAIL_VERIFICATION,
+  EMAIL_HOST,
+  EMAIL_PORT,
+} = process.env;
+
+const COOKIE_SETTINGS = {
+  httpOnly: true,
+  secure: false, // Set this to `true` if you're testing over HTTPS
+  sameSite: 'Strict',
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
+};
 
 export const registerUser = async (req, res) => {
-  const { username, password, role } = req.body;
+  const { username, password, role, email } = req.body;
 
-  if (!username || !password || !role) {
+  console.info('Incoming registration request:', { username, role, email });
+
+  if (!username || !password || !role || !email) {
+    console.warn('Missing required fields');
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.info('Password hashed successfully');
+
     const user = await createUser(username, hashedPassword, role);
-    res.status(201).json({ user });
+    console.info('User created successfully:', user);
+
+    if (ENABLE_EMAIL_VERIFICATION === 'true') {
+      const verificationToken = generateVerificationToken();
+      await createAccountEmail(user.user_id, email, verificationToken);
+
+      const verificationUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+      console.info('Sending verification email to:', email);
+
+      const transporter = nodemailer.createTransport({
+        host: EMAIL_HOST, // Set to "smtp.protonmail.com" for ProtonMail
+        port: EMAIL_PORT || 587, // Common SMTP port
+        secure: EMAIL_PORT == 465, // true for 465, false for 587
+        auth: {
+          user: EMAIL_USER,
+          pass: EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: EMAIL_USER,
+        to: email,
+        subject: 'Email Verification for CommerceCove',
+        text: `Verify your email by clicking on the following link: ${verificationUrl}`,
+      });
+
+      console.info('Verification email sent successfully');
+      res.status(201).json({ message: 'Registration successful. Verify your email to login.' });
+    } else {
+      console.warn('Email verification is disabled');
+      await createAccountEmail(user.user_id, email, null, true);
+      res.status(201).json({ message: 'Registration successful.' });
+    }
   } catch (error) {
-    console.error(error);
+    console.error('Error during registration:', error.message);
     res.status(500).json({ message: 'Error registering user' });
   }
 };
@@ -27,53 +83,56 @@ export const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
+    console.warn('Missing required fields for login');
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
     const user = await findUserByUsername(username);
     if (!user) {
+      console.warn(`User not found: ${username}`);
       return res.status(400).json({ message: 'Invalid username or password' });
+    }
+
+    const userEmail = await findAccountEmailByUserId(user.user_id);
+    if (!userEmail) {
+      console.warn(`Email not found for user_id: ${user.user_id}`);
+      return res.status(403).json({ message: 'Email not found. Please register your email.' });
+    }
+
+    if (ENABLE_EMAIL_VERIFICATION === 'true' && !userEmail.verification_status) {
+      console.warn(`Email not verified for user_id: ${user.user_id}`);
+      return res.status(403).json({ message: 'Email not verified. Please verify your email.' });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      console.warn(`Invalid password for username: ${username}`);
       return res.status(400).json({ message: 'Invalid username or password' });
     }
 
     const token = jwt.sign(
-      { user_id: user.user_id, username: user.username, role: user.role },
+      { user_id: user.user_id, username: user.username, role: user.role, verified: userEmail.verification_status },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    // Set HttpOnly cookies
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Send only over HTTPS in production
-      sameSite: 'Strict', // Prevent CSRF attacks
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
+    res.cookie('token', token, COOKIE_SETTINGS);
+    res.cookie('role', user.role, COOKIE_SETTINGS);
 
-    res.cookie('role', user.role, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
-
+    console.info(`Login successful for user_id: ${user.user_id}`);
     res.status(200).json({ message: 'Login successful' });
   } catch (error) {
-    console.error(error);
+    console.error('Error during login:', error.message);
     res.status(500).json({ message: 'Error logging in' });
   }
 };
 
 export const getStatus = (req, res) => {
-  console.log('Incoming request to /status'); // Debug incoming request
-  console.log('Cookies:', req.cookies); // Log cookies received
+  console.info('Incoming request to /accounts/status');
+  console.info('Cookies received:', req.cookies);
 
-  const token = req.cookies.token; // Extract token from cookies
+  const token = req.cookies.token;
   if (!token) {
     console.warn('No token found in cookies');
     return res.status(401).json({ user: null });
@@ -81,11 +140,40 @@ export const getStatus = (req, res) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log('Decoded JWT:', decoded); // Log decoded JWT payload
+    console.info('Decoded JWT payload:', decoded);
     res.json({ user: decoded });
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('Token verification error:', error.message);
     res.status(401).json({ user: null });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  const { token } = req.query;
+
+  console.info('Verifying email with token:', token);
+
+  if (!token) {
+    console.warn('Missing token in request');
+    return res.status(400).json({ message: 'Invalid or missing token.' });
+  }
+
+  try {
+    // Query email by verification token
+    const emailRecord = await findAccountEmailByToken(token); // Use a new model function
+    if (!emailRecord) {
+      console.warn('Invalid or expired token');
+      return res.status(400).json({ message: 'Invalid or expired token.' });
+    }
+
+    // Mark the email as verified
+    await verifyAccountEmail(emailRecord.email_id);
+    console.info('Email verified successfully for email_id:', emailRecord.email_id);
+
+    res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
+  } catch (error) {
+    console.error('Error verifying email:', error.message);
+    res.status(500).json({ message: 'Error verifying email.' });
   }
 };
 

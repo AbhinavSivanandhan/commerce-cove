@@ -83,6 +83,15 @@ async function setupDatabase() {
         status VARCHAR(20) DEFAULT 'pending',
         created_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS account_email (
+    email_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES account(user_id) ON DELETE CASCADE,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    verification_status BOOLEAN DEFAULT FALSE,
+    verification_token VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     `;
 
     await dbClient.query(schemaQueries);

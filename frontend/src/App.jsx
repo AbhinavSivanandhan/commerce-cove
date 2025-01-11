@@ -7,6 +7,7 @@ import CreateProduct from './pages/CreateProduct';
 import DeleteProduct from './pages/DeleteProduct';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyEmail from './pages/VerifyEmail';
 import ProtectedRoute from './components/ProtectedRoute';
 import Cart from './pages/Cart';
 import OrderHistory from './pages/OrderHistory';
@@ -21,6 +22,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/" element={<Home />} />
         <Route path="/products/create" element={<ProtectedRoute><CreateProduct /></ProtectedRoute>} />
         <Route path="/products/details/:id" element={<ProtectedRoute><ShowProduct /></ProtectedRoute>} />

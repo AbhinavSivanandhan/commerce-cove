@@ -33,7 +33,7 @@ const Home = () => {
           fetchCartItems(); // Fetch cart items for non-admin users
         }
       } else {
-        toast.error('Failed to fetch user status.');
+        toast.error('Not logged in!');
       }
     };
     fetchRoleAndCart();

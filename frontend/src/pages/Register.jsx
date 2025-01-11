@@ -9,15 +9,16 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('customer');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async () => {
     setLoading(true);
     try {
-      await axiosInstance.post('/accounts/register', { username, password, role }); // Simplified URL
+      await axiosInstance.post('/accounts/register', { username, password, role, email });
       setLoading(false);
-      toast.success('Registration successful!');
+      toast.success('Registration successful! Check your email to verify your account.');
       navigate('/login'); // Redirect to login page
     } catch (error) {
       console.error('Registration error:', error);
@@ -48,6 +49,15 @@ const Register = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-md bg-gray-100 border border-gray-300 focus:border-fuchsia-500"
+            />
+          </div>
+          <div>
+            <label className="block text-lg font-medium text-gray-700 mb-2">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-md bg-gray-100 border border-gray-300 focus:border-fuchsia-500"
             />
           </div>
