@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getStatus, verifyEmail } from '../controllers/accountController.js';
+import { registerUser, loginUser, getStatus, verifyEmail,  requestPasswordReset, resetPassword } from '../controllers/accountController.js';
 import { validateRegister, validateLogin } from '../middleware/validationMiddleware.js';
 import { rateLimitMiddleware } from '../middleware/rateLimitMiddleware.js';
 
@@ -9,6 +9,8 @@ router.post('/register', validateRegister, rateLimitMiddleware(200, 3600, 10000)
 router.get('/verify-email', rateLimitMiddleware(200, 3600, 10000), verifyEmail);
 router.post('/login', validateLogin, rateLimitMiddleware(200, 3600, 10000), loginUser);
 router.get('/status', rateLimitMiddleware(200, 3600, 10000), getStatus);
+router.post('/request-password-reset', rateLimitMiddleware(200, 3600, 10000), requestPasswordReset);
+router.post('/reset-password', rateLimitMiddleware(200, 3600, 10000), resetPassword);
 router.post('/logout', rateLimitMiddleware(200, 3600, 10000), (req, res) => {
   res.clearCookie('token', { httpOnly: true, sameSite: 'Strict', secure: false });
   res.clearCookie('role', { httpOnly: true, sameSite: 'Strict', secure: false });

@@ -15,6 +15,8 @@ import Success from './pages/Success';
 import Cancel from './pages/Cancel';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import RequestPasswordReset from './pages/RequestPasswordReset';
+import ResetPassword from './pages/ResetPassword';
 
 const App = () => {
   return (
@@ -23,6 +25,8 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/request-password-reset" element={<RequestPasswordReset />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<Home />} />
         <Route path="/products/create" element={<ProtectedRoute><CreateProduct /></ProtectedRoute>} />
         <Route path="/products/details/:id" element={<ProtectedRoute><ShowProduct /></ProtectedRoute>} />

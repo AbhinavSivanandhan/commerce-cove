@@ -2,9 +2,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
-import { createUser, findUserByUsername } from '../models/userModel.js';
+import { createUser, findUserByUsername, updateUserPassword, savePasswordResetToken, findUserByResetToken } from '../models/userModel.js';
 import { createAccountEmail, findAccountEmailByUserId, verifyAccountEmail, findAccountEmailByEmail, findAccountEmailByToken } from '../models/emailModel.js';
 import { generateVerificationToken } from '../utils/tokenUtils.js';
+import { nanoid } from 'nanoid';
 
 dotenv.config();
 
@@ -187,3 +188,82 @@ export const verifyEmail = async (req, res) => {
   }
 };
 
+export const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    const userEmailRecord = await findAccountEmailByEmail(email);
+    if (!userEmailRecord) {
+      console.warn('Password reset requested for non-existent email:', email);
+      return res.status(404).json({ message: 'No account found with this email.' });
+    }
+
+    const resetToken = nanoid(32);
+    const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    // Set token expiry to 1 hour from now
+    const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
+    await savePasswordResetToken(userEmailRecord.user_id, resetToken, tokenExpiry);
+
+    const transporter = nodemailer.createTransport({
+      host: EMAIL_HOST,
+      port: EMAIL_PORT || 587,
+      secure: EMAIL_PORT == 465,
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: EMAIL_USER,
+      to: email,
+      subject: 'Reset Your Password for CommerceCove',
+      text: `You can reset your password by clicking on this link: ${resetUrl}. This link will expire in 1 hour.`,
+    });
+
+    console.info('Password reset email sent successfully:', email);
+    res.status(200).json({ message: 'Password reset email sent successfully.' });
+  } catch (error) {
+    console.error('Error during password reset request:', error.message);
+    res.status(500).json({ message: 'Error requesting password reset' });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: 'Token and new password are required.' });
+  }
+
+  try {
+    const user = await findUserByResetToken(token);
+    if (!user) {
+      console.warn('Invalid or expired reset token:', token);
+      return res.status(400).json({ message: 'Invalid or expired reset token.' });
+    }
+
+    // Check if token is expired
+    if (new Date() > new Date(user.reset_token_expiry)) {
+      console.warn('Expired reset token for user_id:', user.user_id);
+      return res.status(400).json({ message: 'Reset token has expired. Please request a new one.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await updateUserPassword(user.user_id, hashedPassword);
+
+    // Clear the reset token and expiry
+    await savePasswordResetToken(user.user_id, null, null);
+
+    console.info('Password reset successfully for user_id:', user.user_id);
+    res.status(200).json({ message: 'Password reset successfully.' });
+  } catch (error) {
+    console.error('Error during password reset:', error.message);
+    res.status(500).json({ message: 'Error resetting password.' });
+  }
+};

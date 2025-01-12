@@ -67,6 +67,14 @@ const Login = () => {
               <button className="ml-2 text-fuchsia-500 hover:underline">Register</button>
             </Link>
           </div>
+          <div className="text-center mt-4">
+            <span className="text-gray-700">Forgot your password?</span>{' '}
+            <Link to="/request-password-reset">
+              <button className="ml-2 text-fuchsia-500 hover:underline">
+                Reset Password
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
