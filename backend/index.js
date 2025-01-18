@@ -10,6 +10,8 @@ import orderRoutes from './routes/orderRoutes.js';
 import errorHandler from './middleware/errorMiddleware.js'; // Import error handler
 import Stripe from 'stripe';
 import cookieParser from 'cookie-parser';
+import logger from './utils/logger.js';
+import loggingMiddleware from './middleware/loggingMiddleware.js';
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET)
 
@@ -41,9 +43,11 @@ app.use(
 );
 app.use(cookieParser()); // Parse cookies
 app.use(express.json()); // this will allow to read req.body
-//using route based ratelimiting instead. factory function
+//using route based ratelimiting instead. so below middleware are commented out. factory function
 //app.use(globalRateLimiter); // Apply global rate limiter before all other routes (applies to the whole app)
 //app.use(userRateLimiter); // Apply user/IP-based rate limiter to all routes or specific routes
+// Logging middleware - after cookieParser and express.json
+app.use(loggingMiddleware);  // Log requests and responses
 // Routes
 app.use('/api/v1/accounts', accountRoutes);
 app.use('/api/v1/products', productRoutes);

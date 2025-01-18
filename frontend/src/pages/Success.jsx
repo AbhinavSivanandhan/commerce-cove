@@ -13,9 +13,8 @@ const Success = () => {
     let orderIds;
     try {
       const orderIdsString = decodeURIComponent(urlParams.get('orderIds'));
-      console.log('Encoded orderIds:', orderIdsString);
       orderIds = JSON.parse(orderIdsString);
-      console.log('Parsed orderIds:', orderIds);    } catch (error) {
+      } catch (error) {
       console.error('Error parsing orderIds:', error);
       return;
     }

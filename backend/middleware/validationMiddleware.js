@@ -1,4 +1,3 @@
-// validationMiddleware.js
 export const validateRegister = (req, res, next) => {
   const { username, password, role } = req.body;
   if (!username || !password || !role) {
