@@ -1,0 +1,38 @@
+{
+  "name": "nextjs-gpt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed": "ts-node ./scripts/loadDB.ts",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.1.13",
+    "@datastax/astra-db-ts": "^1.5.0",
+    "@langchain/community": "^0.3.30",
+    "@langchain/core": "^0.3.40",
+    "ai": "^4.1.44",
+    "dotenv": "^16.4.7",
+    "langchain": "^0.3.15",
+    "next": "15.1.7",
+    "openai": "^4.85.1",
+    "puppeteer": "^24.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.7",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "@ai-sdk/provider": "1.0.8"
+  }
+}
